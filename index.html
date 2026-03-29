@@ -3,103 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RoyaalBugger | Intelligence C2</title>
+    <title>RoyaalBugger | Live C2</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --neon: #00f2ff; --bg: #050505; --card: rgba(255, 255, 255, 0.05); --gold: #ffae00; }
-        body { background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; margin: 0; padding: 10px; display: flex; justify-content: center; min-height: 100vh; box-sizing: border-box; }
-        .container { width: 100%; max-width: 1000px; background: var(--card); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 30px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); margin-top: 20px; }
-        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; margin-bottom: 30px; }
-        .logo { font-size: 20px; font-weight: 800; color: var(--neon); text-transform: uppercase; letter-spacing: 2px; }
-        .nav-btn { border: 1px solid var(--neon); color: var(--neon); padding: 8px 15px; border-radius: 8px; text-decoration: none; font-size: 11px; font-weight: bold; transition: 0.3s; }
-        .nav-btn:hover { background: var(--neon); color: #000; box-shadow: 0 0 15px var(--neon); }
-        
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
-        .card { background: rgba(255,255,255,0.02); border-radius: 16px; padding: 20px; border: 1px solid rgba(255,255,255,0.05); }
-        .section-title { font-size: 12px; letter-spacing: 2px; text-transform: uppercase; opacity: 0.5; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
-        
-        /* Styl logów z Supabase */
-        .bug-item { background: rgba(255, 174, 0, 0.05); border-left: 3px solid var(--gold); padding: 12px; margin: 10px 0; border-radius: 6px; font-size: 13px; }
-        
-        /* Styl automatycznych newsów */
-        .feed-item { background: rgba(0, 242, 255, 0.05); border-left: 3px solid var(--neon); padding: 12px; margin: 10px 0; border-radius: 6px; font-size: 13px; animation: slideIn 0.5s ease-out; }
-        .feed-item a { color: var(--neon); text-decoration: none; font-weight: bold; font-size: 11px; display: block; margin-top: 5px; text-transform: uppercase; }
-        
-        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
+        :root { --neon: #00f2ff; --bg: #050505; --card: rgba(255, 255, 255, 0.05); --google: #4285F4; --h1: #ffffff; }
+        body { background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; margin: 0; padding: 10px; display: flex; justify-content: center; min-height: 100vh; }
+        .container { width: 100%; max-width: 1200px; background: var(--card); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 20px; margin-top: 10px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; margin-bottom: 20px; }
+        .logo { font-size: 16px; font-weight: 900; color: var(--neon); letter-spacing: 2px; }
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        .card { background: rgba(0,0,0,0.3); border-radius: 16px; padding: 15px; border: 1px solid rgba(255,255,255,0.05); min-height: 500px; }
+        .section-title { font-size: 10px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        .item { background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px; margin-bottom: 10px; border-left: 3px solid #333; font-size: 12px; transition: 0.3s; }
+        .item:hover { background: rgba(255,255,255,0.06); }
+        .google-item { border-left-color: var(--google); }
+        .h1-item { border-left-color: var(--h1); }
+        .item b { display: block; margin-bottom: 4px; color: var(--neon); font-size: 13px; }
+        .item small { opacity: 0.5; display: block; margin-top: 8px; font-size: 10px; }
+        @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <div class="logo">ROYAAL_INTELLIGENCE</div>
-            <a href="admin.html" class="nav-btn">TERMINAL</a>
+            <div class="logo">● ROYAAL_BUGGER_INTELLIGENCE</div>
+            <a href="admin.html" style="color:var(--neon); text-decoration:none; font-size:11px; font-weight:bold; border:1px solid var(--neon); padding:5px 10px; border-radius:6px;">TERMINAL</a>
         </div>
-
         <div class="grid">
             <div class="card">
-                <div class="section-title"><span style="color:var(--gold)">●</span> PRIVATE LOGS</div>
-                <div id="logs-container">Łączenie z bazą...</div>
+                <div class="section-title" style="color:var(--google)">● Google VRP Status</div>
+                <div id="google-list"></div>
             </div>
-
             <div class="card">
-                <div class="section-title"><span style="color:var(--neon)">●</span> GLOBAL BUG FEED</div>
-                <div id="rss-feed">Przeszukiwanie HackerOne & Bugcrowd...</div>
+                <div class="section-title" style="color:var(--h1)">● HackerOne Activity</div>
+                <div id="h1-list"></div>
+            </div>
+            <div class="card">
+                <div class="section-title" style="color:#ffae00">● Manual Logs</div>
+                <div id="manual-list"></div>
             </div>
         </div>
     </div>
 
     <script>
-        // --- KONFIGURACJA SUPABASE ---
         const SB_URL = 'https://fvxodipuudkhzykpleul.supabase.co';
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2eG9kaXB1dWRraHp5a3BsZXVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MDkyNjIsImV4cCI6MjA5MDM4NTI2Mn0.uBTUlc0-aoOzWsroJ1dvhV4JFbjJXnJ8EZjuMAAiQMQ';
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
 
-        // Pobieranie Twoich logów
-        async function loadSupabaseLogs() {
+        async function sync() {
             const { data } = await supabaseClient.from('logs').select('*');
-            const container = document.getElementById('logs-container');
-            if (data) {
-                container.innerHTML = data.reverse().slice(0, 5).map(log => `
-                    <div class="bug-item">
-                        <b>${log.title}</b>: ${log.content}
-                    </div>
-                `).join('');
-            }
+            if (!data) return;
+            const logs = data.reverse();
+
+            const render = (l, cls) => `<div class="item ${cls}"><b>${l.title}</b>${l.content.substring(0, 150)}${l.content.length > 150 ? '...' : ''}<small>${new Date(l.created_at).toLocaleString()}</small></div>`;
+
+            document.getElementById('google-list').innerHTML = logs.filter(l => l.type === 'GOOGLE').map(l => render(l, 'google-item')).join('');
+            document.getElementById('h1-list').innerHTML = logs.filter(l => l.type === 'H1').map(l => render(l, 'h1-item')).join('');
+            document.getElementById('manual-list').innerHTML = logs.filter(l => l.type !== 'GOOGLE' && l.type !== 'H1').map(l => render(l, '')).join('');
         }
 
-        // --- AUTOMATYCZNY FEED (HackerOne & Bugcrowd) ---
-        async function loadGlobalFeeds() {
-            const feedContainer = document.getElementById('rss-feed');
-            // Używamy RSS2JSON do pobrania publicznych raportów HackerOne
-            const hackerOneRSS = "https://hackerone.com/hacktivity.rss";
-            const api_url = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(hackerOneRSS)}`;
-
-            try {
-                const response = await fetch(api_url);
-                const data = await response.json();
-                
-                if (data.items) {
-                    feedContainer.innerHTML = data.items.slice(0, 5).map(item => `
-                        <div class="feed-item">
-                            <b>${item.author || 'HackerOne'}</b>: ${item.title.substring(0, 60)}...
-                            <a href="${item.link}" target="_blank">SZCZEGÓŁY RAPORTU →</a>
-                        </div>
-                    `).join('');
-                }
-            } catch (e) {
-                feedContainer.innerHTML = "Błąd pobierania feedu.";
-            }
-        }
-
-        // Odświeżanie
-        setInterval(() => {
-            loadSupabaseLogs();
-            loadGlobalFeeds();
-        }, 30000); // Co 30 sekund
-
-        loadSupabaseLogs();
-        loadGlobalFeeds();
+        sync();
+        setInterval(sync, 5000);
     </script>
 </body>
 </html>
