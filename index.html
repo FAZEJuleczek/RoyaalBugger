@@ -8,90 +8,73 @@
     <style>
         :root { --neon: #00f2ff; --bg: #050505; --card: rgba(255, 255, 255, 0.05); }
         body { background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .container { width: 90%; max-width: 1000px; background: var(--card); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 40px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); margin: 20px; }
+        .container { width: 90%; max-width: 1000px; background: var(--card); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 40px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
         .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; margin-bottom: 30px; }
-        .logo { font-size: 24px; font-weight: 800; letter-spacing: -1px; color: var(--neon); text-transform: uppercase; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-        .card { background: rgba(255,255,255,0.03); border-radius: 16px; padding: 20px; border: 1px solid rgba(255,255,255,0.05); transition: 0.3s; }
-        .stat { font-size: 32px; font-weight: 700; color: var(--neon); margin: 10px 0; }
-        .label { font-size: 12px; text-transform: uppercase; opacity: 0.5; letter-spacing: 1px; }
-        .bug-item { background: rgba(255, 174, 0, 0.1); border-left: 3px solid #ffae00; padding: 15px; margin: 10px 0; border-radius: 4px; font-size: 14px; }
+        .logo { font-size: 24px; font-weight: 800; color: var(--neon); text-transform: uppercase; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .card { background: rgba(255,255,255,0.03); border-radius: 16px; padding: 20px; border: 1px solid rgba(255,255,255,0.05); }
+        .stat { font-size: 24px; font-weight: 700; color: var(--neon); margin: 10px 0; }
+        .bug-item { background: rgba(255, 174, 0, 0.1); border-left: 3px solid #ffae00; padding: 15px; margin: 10px 0; border-radius: 4px; }
         .pulse { width: 10px; height: 10px; background: var(--neon); border-radius: 50%; display: inline-block; margin-right: 10px; box-shadow: 0 0 10px var(--neon); animation: blink 1.5s infinite; }
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <div class="logo">RoyaalBugger // C2</div>
-            <div style="font-size: 14px; opacity: 0.6;"><span class="pulse"></span> SYSTEM ACTIVE</div>
+            <div><span class="pulse"></span> SYSTEM ACTIVE</div>
         </div>
-        
         <div class="grid">
             <div class="card">
-                <div class="label">Status bazy danych</div>
+                <div style="font-size: 12px; opacity: 0.5;">STATUS BAZY</div>
                 <div id="db-status" class="stat">ŁĄCZENIE...</div>
             </div>
             <div class="card">
-                <div class="label">Ostatnia aktywność</div>
-                <div id="last-update" class="stat" style="font-size: 18px;">CZEKAM...</div>
+                <div style="font-size: 12px; opacity: 0.5;">OSTATNIA AKTUALIZACJA</div>
+                <div id="last-update" class="stat">--:--:--</div>
             </div>
         </div>
-
-        <h3 style="margin-top: 40px; opacity: 0.8;">🚧 Live Logs from Supabase</h3>
-        <div id="logs-container">
-            <p style="opacity: 0.5;">Pobieranie danych...</p>
-        </div>
+        <h3 style="margin-top: 30px; opacity: 0.8;">🚧 Live Logs</h3>
+        <div id="logs-container">Czekam na dane...</div>
     </div>
 
-  <script>
-    // TWOJE DANE KONFIGURACYJNE
-    const SB_URL = 'https://xropcpuoghapfumdcyqh.supabase.co';
-    const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhyb3BjcHVvZ2hhcGZ1bWRjcXFoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3ODU1OTEsImV4cCI6MjA5MDM2MTU5MX0.WguBROzPFVR50j5zY7rWSinjk-D5Rl_EBwS_gRgL-EQ';
-    
-    // Inicjalizacja klienta
-    const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
+    <script>
+        const SB_URL = 'https://xropcpuoghapfumdcyqh.supabase.co';
+        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhyb3BjcHVvZ2hhcGZ1bWRjcXFoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3ODU1OTEsImV4cCI6MjA5MDM2MTU5MX0.WguBROzPFVR50j5zY7rWSinjk-D5Rl_EBwS_gRgL-EQ';
+        const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
 
-    async function loadLogs() {
-        console.log("Próbuję pobrać dane...");
-        
-        // Pobieramy dane bez sortowania po created_at (bo go nie ma w Twojej tabeli)
-        const { data, error } = await supabaseClient
-            .from('logs')
-            .select('*');
+        async function loadLogs() {
+            const { data, error } = await supabaseClient.from('logs').select('*');
+            const container = document.getElementById('logs-container');
+            const statusBox = document.getElementById('db-status');
+            
+            if (error) {
+                statusBox.innerText = "BŁĄD";
+                statusBox.style.color = "red";
+                console.error(error);
+                return;
+            }
 
-        const container = document.getElementById('logs-container');
-        const statusBox = document.getElementById('db-status');
-        
-        if (error) {
-            console.error("Błąd bazy:", error);
-            statusBox.innerText = "ERROR";
-            statusBox.style.color = "red";
-            return;
+            statusBox.innerText = "POŁĄCZONO";
+            statusBox.style.color = "#00f2ff";
+            document.getElementById('last-update').innerText = new Date().toLocaleTimeString();
+
+            if (!data || data.length === 0) {
+                container.innerHTML = '<p style="opacity: 0.5;">Baza jest pusta. Dodaj coś w Supabase!</p>';
+            } else {
+                container.innerHTML = '';
+                data.forEach(log => {
+                    const div = document.createElement('div');
+                    div.className = 'bug-item';
+                    div.innerHTML = `<b>[${log.type || 'INFO'}]</b> ${log.title}: ${log.content}`;
+                    container.appendChild(div);
+                });
+            }
         }
 
-        statusBox.innerText = "CONNECTED";
-        statusBox.style.color = "#00ff00";
-        container.innerHTML = ''; 
-
-        if (!data || data.length === 0) {
-            container.innerHTML = '<p style="opacity: 0.5;">Baza jest pusta. Dodaj coś w panelu Supabase!</p>';
-        } else {
-            // Wyświetlamy od najnowszych (od końca tablicy)
-            data.reverse().forEach(log => {
-                const div = document.createElement('div');
-                div.className = 'bug-item';
-                div.innerHTML = `<b>[${log.type ? log.type.toUpperCase() : 'INFO'}]</b> ${log.title}: ${log.content}`;
-                container.appendChild(div);
-            });
-        }
-        
-        document.getElementById('last-update').innerText = new Date().toLocaleTimeString();
-    }
-
-    // Odświeżaj co 5 sekund
-    setInterval(loadLogs, 5000);
-    loadLogs();
-</script>
+        setInterval(loadLogs, 3000);
+        loadLogs();
+    </script>
 </body>
 </html>
