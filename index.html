@@ -40,7 +40,7 @@
     </div>
 
     <script>
-        // TWOJE DANE KONFIGURACYJNE (PROJEKT FRANKFURT)
+        // TWOJE DANE KONFIGURACYJNE (NOWY PROJEKT FRANKFURT)
         const SB_URL = 'https://fvxodipuudkhzykpleul.supabase.co';
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2eG9kaXB1dWRraHp5a3BsZXVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MDkyNjIsImV4cCI6MjA5MDM4NTI2Mn0.uBTUlc0-aoOzWsroJ1dvhV4JFbjJXnJ8EZjuMAAiQMQ';
 
@@ -54,4 +54,35 @@
                     .select('*');
 
                 const container = document.getElementById('logs-container');
-                const statusBox = document.getElementById('db-
+                const statusBox = document.getElementById('db-status');
+                
+                if (error) throw error;
+
+                statusBox.innerText = "ONLINE";
+                statusBox.style.color = "#00f2ff";
+                document.getElementById('last-update').innerText = new Date().toLocaleTimeString();
+
+                if (!data || data.length === 0) {
+                    container.innerHTML = '<p style="opacity: 0.5;">Połączono pomyślnie. Brak wpisów w tabeli logs.</p>';
+                } else {
+                    container.innerHTML = '';
+                    data.reverse().forEach(log => {
+                        const div = document.createElement('div');
+                        div.className = 'bug-item';
+                        div.innerHTML = `<b>[${log.type || 'INFO'}]</b> ${log.title || 'No Title'}: ${log.content || 'No Content'}`;
+                        container.appendChild(div);
+                    });
+                }
+            } catch (err) {
+                console.error("Błąd połączenia:", err);
+                document.getElementById('db-status').innerText = "ERROR";
+                document.getElementById('db-status').style.color = "red";
+                document.getElementById('logs-container').innerHTML = "Błąd autoryzacji. Sprawdź tabelę i klucz.";
+            }
+        }
+
+        setInterval(loadLogs, 3000);
+        loadLogs();
+    </script>
+</body>
+</html>
