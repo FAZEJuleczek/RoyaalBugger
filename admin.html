@@ -2,65 +2,43 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RoyaalBugger | Operator Console</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RoyaalBugger | Admin</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --neon: #00f2ff; --bg: #050505; --card: rgba(255, 255, 255, 0.05); }
-        body { background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .container { width: 90%; max-width: 600px; background: var(--card); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 40px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
-        
-        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; margin-bottom: 30px; }
-        .logo { font-size: 20px; font-weight: 800; color: var(--neon); text-transform: uppercase; letter-spacing: 2px; }
-        
-        .nav-btn { 
-            color: var(--neon); text-decoration: none; font-size: 11px; font-weight: bold;
-            border: 1px solid var(--neon); padding: 6px 12px; border-radius: 8px; 
-            transition: 0.3s; text-transform: uppercase;
-        }
-        .nav-btn:hover { background: var(--neon); color: #000; box-shadow: 0 0 15px var(--neon); }
-
-        .input-group { margin-bottom: 25px; }
-        label { display: block; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6; margin-bottom: 10px; }
-        
+        body { background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; margin: 0; padding: 10px; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }
+        .container { width: 100%; max-width: 500px; background: var(--card); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 30px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .logo { font-size: 18px; font-weight: 800; color: var(--neon); text-transform: uppercase; letter-spacing: 1px; }
+        .back-link { color: var(--neon); text-decoration: none; font-size: 12px; border-bottom: 1px solid var(--neon); padding-bottom: 2px; opacity: 0.8; }
         textarea { 
-            width: 100%; height: 150px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); 
-            border-radius: 12px; color: #fff; padding: 15px; font-family: 'Monaco', monospace; resize: none; box-sizing: border-box;
-            outline: none; transition: 0.3s; font-size: 13px; line-height: 1.5;
+            width: 100%; height: 180px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); 
+            border-radius: 12px; color: #00f2ff; padding: 15px; font-family: 'Monaco', monospace; resize: none; 
+            box-sizing: border-box; outline: none; font-size: 16px; /* 16px zapobiega zoomowi na iPhone */
         }
-        textarea:focus { border-color: var(--neon); box-shadow: 0 0 15px rgba(0, 242, 255, 0.2); }
-
+        textarea:focus { border-color: var(--neon); }
         .btn { 
-            width: 100%; background: var(--neon); color: #000; border: none; padding: 16px; 
+            width: 100%; background: var(--neon); color: #000; border: none; padding: 20px; 
             border-radius: 12px; font-weight: 800; cursor: pointer; text-transform: uppercase; 
-            letter-spacing: 2px; transition: 0.3s; font-size: 14px;
+            letter-spacing: 2px; margin-top: 20px; font-size: 16px; transition: 0.3s;
         }
-        .btn:hover { transform: translateY(-2px); box-shadow: 0 0 25px var(--neon); opacity: 0.9; }
-        
-        #st { margin-top: 25px; text-align: center; font-size: 12px; font-weight: bold; letter-spacing: 1px; }
-        .pulse { width: 8px; height: 8px; background: var(--neon); border-radius: 50%; display: inline-block; margin-right: 8px; box-shadow: 0 0 8px var(--neon); animation: blink 1.5s infinite; }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        .btn:active { transform: scale(0.98); opacity: 0.8; }
+        #st { margin-top: 20px; text-align: center; font-size: 12px; font-weight: bold; min-height: 1.2em; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <div class="logo"><span class="pulse"></span> TERMINAL</div>
-            <a href="index.html" class="nav-btn">← POWRÓT</a>
+            <div class="logo">OPERATOR_CONSOLE</div>
+            <a href="index.html" class="back-link">← DASHBOARD</a>
         </div>
-        
-        <div class="input-group">
-            <label>Remote AI Command Packet</label>
-            <textarea id="remoteCmd" placeholder='{"title": "...", "content": "...", "type": "..."}'></textarea>
-        </div>
-        
+        <textarea id="remoteCmd" placeholder='Wklej kod od Gemini...'></textarea>
         <button class="btn" onclick="executeRemote()">Execute Sync</button>
-        
-        <div id="st">READY FOR DATA INJECTION...</div>
+        <div id="st">READY</div>
     </div>
 
     <script>
-        // TWOJE DANE KONFIGURACYJNE
         const SB_URL = 'https://fvxodipuudkhzykpleul.supabase.co';
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2eG9kaXB1dWRraHp5a3BsZXVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MDkyNjIsImV4cCI6MjA5MDM4NTI2Mn0.uBTUlc0-aoOzWsroJ1dvhV4JFbjJXnJ8EZjuMAAiQMQ';
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
@@ -68,32 +46,19 @@
         async function executeRemote() {
             const statusBox = document.getElementById('st');
             const input = document.getElementById('remoteCmd');
-            
-            if (!input.value.trim()) {
-                statusBox.innerText = "ERROR: INPUT EMPTY";
-                statusBox.style.color = "#ff4444";
-                return;
-            }
-
+            if (!input.value) return;
             try {
-                statusBox.innerText = "TRANSMITTING...";
+                statusBox.innerText = "SENDING...";
                 statusBox.style.color = "var(--neon)";
-                
-                // Parsowanie kodu JSON od Gemini
                 const cmd = JSON.parse(input.value);
-                
-                // Wysłanie do bazy Supabase
                 const { error } = await supabaseClient.from('logs').insert([cmd]);
-                
                 if (error) throw error;
-
-                statusBox.innerText = "SUCCESS: PACKET DELIVERED";
+                statusBox.innerText = "SUCCESS: DATA INJECTED";
                 statusBox.style.color = "#00ff88";
-                input.value = ''; // Wyczyszczenie pola po wysłaniu
+                input.value = '';
             } catch(e) {
-                statusBox.innerText = "ERROR: INVALID PACKET FORMAT";
+                statusBox.innerText = "ERROR: WRONG FORMAT";
                 statusBox.style.color = "#ff4444";
-                console.error(e);
             }
         }
     </script>
