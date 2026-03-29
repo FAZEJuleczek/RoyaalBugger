@@ -11,6 +11,12 @@
         .container { width: 90%; max-width: 1000px; background: var(--card); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 40px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
         .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; margin-bottom: 30px; }
         .logo { font-size: 24px; font-weight: 800; color: var(--neon); text-transform: uppercase; }
+        .nav-btn { 
+            background: transparent; border: 1px solid var(--neon); color: var(--neon); 
+            padding: 8px 16px; border-radius: 8px; cursor: pointer; text-decoration: none;
+            font-size: 12px; font-weight: bold; transition: 0.3s;
+        }
+        .nav-btn:hover { background: var(--neon); color: #000; box-shadow: 0 0 15px var(--neon); }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .card { background: rgba(255,255,255,0.03); border-radius: 16px; padding: 20px; border: 1px solid rgba(255,255,255,0.05); }
         .stat { font-size: 24px; font-weight: 700; color: var(--neon); margin: 10px 0; }
@@ -23,7 +29,7 @@
     <div class="container">
         <div class="header">
             <div class="logo">RoyaalBugger // C2</div>
-            <div><span class="pulse"></span> SYSTEM ACTIVE</div>
+            <a href="admin.html" class="nav-btn">DODAJ LOG (TERMINAL)</a>
         </div>
         <div class="grid">
             <div class="card">
@@ -40,47 +46,35 @@
     </div>
 
     <script>
-        // TWOJE DANE KONFIGURACYJNE (NOWY PROJEKT FRANKFURT)
         const SB_URL = 'https://fvxodipuudkhzykpleul.supabase.co';
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2eG9kaXB1dWRraHp5a3BsZXVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MDkyNjIsImV4cCI6MjA5MDM4NTI2Mn0.uBTUlc0-aoOzWsroJ1dvhV4JFbjJXnJ8EZjuMAAiQMQ';
-
-        // Inicjalizacja klienta
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
 
         async function loadLogs() {
             try {
-                const { data, error } = await supabaseClient
-                    .from('logs')
-                    .select('*');
-
+                const { data, error } = await supabaseClient.from('logs').select('*');
                 const container = document.getElementById('logs-container');
                 const statusBox = document.getElementById('db-status');
-                
                 if (error) throw error;
-
                 statusBox.innerText = "ONLINE";
                 statusBox.style.color = "#00f2ff";
                 document.getElementById('last-update').innerText = new Date().toLocaleTimeString();
-
                 if (!data || data.length === 0) {
-                    container.innerHTML = '<p style="opacity: 0.5;">Połączono pomyślnie. Brak wpisów w tabeli logs.</p>';
+                    container.innerHTML = '<p style="opacity: 0.5;">Połączono. Czekam na dane...</p>';
                 } else {
                     container.innerHTML = '';
                     data.reverse().forEach(log => {
                         const div = document.createElement('div');
                         div.className = 'bug-item';
-                        div.innerHTML = `<b>[${log.type || 'INFO'}]</b> ${log.title || 'No Title'}: ${log.content || 'No Content'}`;
+                        div.innerHTML = `<b>[${log.type || 'INFO'}]</b> ${log.title}: ${log.content}`;
                         container.appendChild(div);
                     });
                 }
             } catch (err) {
-                console.error("Błąd połączenia:", err);
-                document.getElementById('db-status').innerText = "ERROR";
+                document.getElementById('db-status').innerText = "OFFLINE";
                 document.getElementById('db-status').style.color = "red";
-                document.getElementById('logs-container').innerHTML = "Błąd autoryzacji. Sprawdź tabelę i klucz.";
             }
         }
-
         setInterval(loadLogs, 3000);
         loadLogs();
     </script>
