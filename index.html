@@ -44,49 +44,54 @@
         </div>
     </div>
 
-    <script>
-        // TWOJE DANE KONFIGURACYJNE
-        const SB_URL = 'https://xropcpuoghapfumdcyqh.supabase.co';
-        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhyb3BjcHVvZ2hhcGZ1bWRjcXFoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3ODU1OTEsImV4cCI6MjA5MDM2MTU5MX0.WguBROzPFVR50j5zY7rWSinjk-D5Rl_EBwS_gRgL-EQ';
+  <script>
+    // TWOJE DANE KONFIGURACYJNE
+    const SB_URL = 'https://xropcpuoghapfumdcyqh.supabase.co';
+    const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhyb3BjcHVvZ2hhcGZ1bWRjcXFoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3ODU1OTEsImV4cCI6MjA5MDM2MTU5MX0.WguBROzPFVR50j5zY7rWSinjk-D5Rl_EBwS_gRgL-EQ';
+    
+    // Inicjalizacja klienta
+    const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
+
+    async function loadLogs() {
+        console.log("Próbuję pobrać dane...");
         
-        const supabase = supabase.createClient(SB_URL, SB_KEY);
+        // Pobieramy dane bez sortowania po created_at (bo go nie ma w Twojej tabeli)
+        const { data, error } = await supabaseClient
+            .from('logs')
+            .select('*');
 
-        async function loadLogs() {
-            const { data, error } = await supabase
-                .from('logs')
-                .select('*')
-                .order('created_at', { ascending: false });
-
-            const container = document.getElementById('logs-container');
-            const statusBox = document.getElementById('db-status');
-            
-            if (error) {
-                console.error(error);
-                statusBox.innerText = "ERROR";
-                statusBox.style.color = "red";
-                return;
-            }
-
-            statusBox.innerText = "CONNECTED";
-            container.innerHTML = ''; // Czyścimy stare wpisy
-
-            if (data.length === 0) {
-                container.innerHTML = '<p style="opacity: 0.5;">Baza jest pusta. Czekam na pierwszego buga...</p>';
-            }
-
-            data.forEach(log => {
-                const div = document.createElement('div');
-                div.className = 'bug-item';
-                div.innerHTML = `<b>[${log.type.toUpperCase()}]</b> ${log.title}: ${log.content}`;
-                container.appendChild(div);
-            });
-            
-            document.getElementById('last-update').innerText = new Date().toLocaleTimeString();
+        const container = document.getElementById('logs-container');
+        const statusBox = document.getElementById('db-status');
+        
+        if (error) {
+            console.error("Błąd bazy:", error);
+            statusBox.innerText = "ERROR";
+            statusBox.style.color = "red";
+            return;
         }
 
-        // Odświeżaj co 5 sekund
-        setInterval(loadLogs, 5000);
-        loadLogs();
-    </script>
+        statusBox.innerText = "CONNECTED";
+        statusBox.style.color = "#00ff00";
+        container.innerHTML = ''; 
+
+        if (!data || data.length === 0) {
+            container.innerHTML = '<p style="opacity: 0.5;">Baza jest pusta. Dodaj coś w panelu Supabase!</p>';
+        } else {
+            // Wyświetlamy od najnowszych (od końca tablicy)
+            data.reverse().forEach(log => {
+                const div = document.createElement('div');
+                div.className = 'bug-item';
+                div.innerHTML = `<b>[${log.type ? log.type.toUpperCase() : 'INFO'}]</b> ${log.title}: ${log.content}`;
+                container.appendChild(div);
+            });
+        }
+        
+        document.getElementById('last-update').innerText = new Date().toLocaleTimeString();
+    }
+
+    // Odświeżaj co 5 sekund
+    setInterval(loadLogs, 5000);
+    loadLogs();
+</script>
 </body>
 </html>
