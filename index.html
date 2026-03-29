@@ -14,7 +14,7 @@
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .card { background: rgba(255,255,255,0.03); border-radius: 16px; padding: 20px; border: 1px solid rgba(255,255,255,0.05); }
         .stat { font-size: 24px; font-weight: 700; color: var(--neon); margin: 10px 0; }
-        .bug-item { background: rgba(255, 174, 0, 0.1); border-left: 3px solid #ffae00; padding: 15px; margin: 10px 0; border-radius: 4px; }
+        .bug-item { background: rgba(255, 174, 0, 0.1); border-left: 3px solid #ffae00; padding: 15px; margin: 10px 0; border-radius: 4px; border-top-right-radius: 12px; border-bottom-right-radius: 12px; }
         .pulse { width: 10px; height: 10px; background: var(--neon); border-radius: 50%; display: inline-block; margin-right: 10px; box-shadow: 0 0 10px var(--neon); animation: blink 1.5s infinite; }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
     </style>
@@ -27,16 +27,16 @@
         </div>
         <div class="grid">
             <div class="card">
-                <div style="font-size: 12px; opacity: 0.5;">STATUS BAZY</div>
-                <div id="db-status" class="stat">ŁĄCZENIE...</div>
+                <div style="font-size: 11px; opacity: 0.5; letter-spacing: 1px;">DATABASE</div>
+                <div id="db-status" class="stat">CONNECTING...</div>
             </div>
             <div class="card">
-                <div style="font-size: 12px; opacity: 0.5;">OSTATNIA AKTUALIZACJA</div>
+                <div style="font-size: 11px; opacity: 0.5; letter-spacing: 1px;">LAST SYNC</div>
                 <div id="last-update" class="stat">--:--:--</div>
             </div>
         </div>
-        <h3 style="margin-top: 30px; opacity: 0.8;">🚧 Live Logs</h3>
-        <div id="logs-container">Czekam na dane...</div>
+        <h3 style="margin-top: 35px; opacity: 0.8; font-size: 14px; letter-spacing: 2px;">📡 LIVE FEED FROM SUPABASE</h3>
+        <div id="logs-container">Wczytywanie protokołów...</div>
     </div>
 
     <script>
@@ -45,31 +45,34 @@
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
 
         async function loadLogs() {
-            const { data, error } = await supabaseClient.from('logs').select('*');
-            const container = document.getElementById('logs-container');
-            const statusBox = document.getElementById('db-status');
-            
-            if (error) {
-                statusBox.innerText = "BŁĄD";
-                statusBox.style.color = "red";
-                console.error(error);
-                return;
-            }
+            try {
+                const { data, error } = await supabaseClient.from('logs').select('*');
+                const container = document.getElementById('logs-container');
+                const statusBox = document.getElementById('db-status');
+                
+                if (error) throw error;
 
-            statusBox.innerText = "POŁĄCZONO";
-            statusBox.style.color = "#00f2ff";
-            document.getElementById('last-update').innerText = new Date().toLocaleTimeString();
+                statusBox.innerText = "ONLINE";
+                statusBox.style.color = "#00f2ff";
+                document.getElementById('last-update').innerText = new Date().toLocaleTimeString();
 
-            if (!data || data.length === 0) {
-                container.innerHTML = '<p style="opacity: 0.5;">Baza jest pusta. Dodaj coś w Supabase!</p>';
-            } else {
-                container.innerHTML = '';
-                data.forEach(log => {
-                    const div = document.createElement('div');
-                    div.className = 'bug-item';
-                    div.innerHTML = `<b>[${log.type || 'INFO'}]</b> ${log.title}: ${log.content}`;
-                    container.appendChild(div);
-                });
+                if (!data || data.length === 0) {
+                    container.innerHTML = '<p style="opacity: 0.5; font-style: italic;">Baza danych jest pusta. Czekam na dane z zewnątrz...</p>';
+                } else {
+                    container.innerHTML = '';
+                    data.reverse().forEach(log => {
+                        const div = document.createElement('div');
+                        div.className = 'bug-item';
+                        div.innerHTML = `<div style="font-size: 10px; opacity: 0.6; margin-bottom: 5px;">TYPE: ${log.type || 'UNKNOWN'}</div>
+                                         <div style="font-weight: bold; color: #ffae00;">${log.title}</div>
+                                         <div style="font-size: 13px; margin-top: 5px; opacity: 0.9;">${log.content}</div>`;
+                        container.appendChild(div);
+                    });
+                }
+            } catch (err) {
+                document.getElementById('db-status').innerText = "OFFLINE";
+                document.getElementById('db-status').style.color = "red";
+                console.error("Critical System Error:", err);
             }
         }
 
