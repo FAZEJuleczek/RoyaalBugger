@@ -39,56 +39,50 @@
         <div id="logs-container">Wczytywanie protokołów...</div>
     </div>
 
-        <script>
-    // TWOJE DANE KONFIGURACYJNE
-  // NOWY PROJEKT (FRANKFURT / LONDYN)
-    const SB_URL = 'https://fvxodipuudkhzykpleul.supabase.co';
-    const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2eG9kaXB1dWRraHp5a3BsZXVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MDkyNjIsImV4cCI6MjA5MDM4NTI2Mn0.uBTUlc0-aoOzWsroJ1dvhV4JFbjJXnJ8EZjuMAAiQMQ'; 
-// Użyj całego Anon Key z okienka na screenieJlZiI6Inhyb3BjcHVvZ2hhcGZ1bWRjcXFoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3ODU1OTEsImV4cCI6MjA5MDM2MTU5MX0.WguBROzPFVR50j5zY7rWSinjk-D5Rl_EBwS_gRgL-EQ';
-    
-    // Inicjalizacja klienta z dodatkowymi ustawieniami
-    const supabaseClient = supabase.createClient(SB_URL, SB_KEY, {
-      auth: { persistSession: false }
-    });
+    <script>
+        // TWOJE DANE KONFIGURACYJNE (PROJEKT FRANKFURT)
+        const SB_URL = 'https://fvxodipuudkhzykpleul.supabase.co';
+        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2eG9kaXB1dWRkaHp5a3BsZXVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MDkyNjIsImV4cCI6MjA5MDM4NTI2Mn0.uBTUlc0-aoOzWsroJ1dvhV4JFbjJXnJ8EZjuMAAiQMQ';
 
-    async function loadLogs() {
-        try {
-            console.log("Próba nawiązania łączności...");
-            const { data, error } = await supabaseClient
-                .from('logs')
-                .select('*');
+        // Inicjalizacja klienta
+        const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
 
-            const container = document.getElementById('logs-container');
-            const statusBox = document.getElementById('db-status');
-            
-            if (error) throw error;
+        async function loadLogs() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('logs')
+                    .select('*');
 
-            statusBox.innerText = "ONLINE";
-            statusBox.style.color = "#00f2ff";
-            document.getElementById('last-update').innerText = new Date().toLocaleTimeString();
+                const container = document.getElementById('logs-container');
+                const statusBox = document.getElementById('db-status');
+                
+                if (error) throw error;
 
-            if (!data || data.length === 0) {
-                container.innerHTML = '<p style="opacity: 0.5;">Baza pusta, ale połączenie OK.</p>';
-            } else {
-                container.innerHTML = '';
-                // Wyświetlamy wpisy, które widzę na Twoim screenie
-                data.reverse().forEach(log => {
-                    const div = document.createElement('div');
-                    div.className = 'bug-item';
-                    div.innerHTML = `<b>[${log.type}]</b> ${log.title}: ${log.content}`;
-                    container.appendChild(div);
-                });
+                statusBox.innerText = "ONLINE";
+                statusBox.style.color = "#00f2ff";
+                document.getElementById('last-update').innerText = new Date().toLocaleTimeString();
+
+                if (!data || data.length === 0) {
+                    container.innerHTML = '<p style="opacity: 0.5;">Połączono. Czekam na dane w tabeli logs...</p>';
+                } else {
+                    container.innerHTML = '';
+                    data.reverse().forEach(log => {
+                        const div = document.createElement('div');
+                        div.className = 'bug-item';
+                        div.innerHTML = `<b>[${log.type || 'INFO'}]</b> ${log.title}: ${log.content}`;
+                        container.appendChild(div);
+                    });
+                }
+            } catch (err) {
+                console.error("Błąd połączenia:", err);
+                document.getElementById('db-status').innerText = "OFFLINE";
+                document.getElementById('db-status').style.color = "red";
+                document.getElementById('logs-container').innerHTML = "Błąd klucza lub brak tabeli 'logs'.";
             }
-        } catch (err) {
-            console.error("Błąd krytyczny:", err);
-            document.getElementById('db-status').innerText = "OFFLINE";
-            document.getElementById('db-status').style.color = "red";
-            document.getElementById('logs-container').innerHTML = "Błąd połączenia. Sprawdź konsolę (F12).";
         }
-    }
 
-    setInterval(loadLogs, 3000); // Odświeżaj co 3 sekundy
-    loadLogs();
+        setInterval(loadLogs, 3000);
+        loadLogs();
     </script>
 </body>
 </html>
