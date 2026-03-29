@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>RoyaalBugger C2 Dashboard</title>
+    <style>
+        body { background: #0a0a0a; color: #00ff00; font-family: 'Courier New', monospace; padding: 20px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .card { border: 1px solid #00ff00; padding: 15px; background: rgba(0, 255, 0, 0.05); }
+        h1, h2 { border-bottom: 1px solid #00ff00; padding-bottom: 5px; }
+        .status-online { color: #00ff00; font-weight: bold; }
+        .bug-item { color: #ffae00; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <h1>🛰️ ROYAAL_BUGGER CONTROL CENTER</h1>
+    
+    <div class="grid">
+        <div class="card">
+            <h2>📊 Statystyki Systemu</h2>
+            <p>Status Serwera: <span class="status-online">ONLINE</span></p>
+            <p>Aktywne Beacony: 0</p>
+            <p>Ostatni Screen: brak</p>
+        </div>
+
+        <div class="card">
+            <h2>🚧 Unfinished Business</h2>
+            <div id="bug-list">
+                <div class="bug-item">[TODO] Połączenie Webhooka Discord z Pythonem</div>
+                <div class="bug-item">[TODO] System cyklicznych screenshotów (V3)</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card" style="margin-top: 20px;">
+        <h2>📝 Ostatnie Notatki</h2>
+        <p><em>Tu będą lądować Twoje opisy jak co zrobiłeś...</em></p>
+    </div>
+</body>
+</html>
