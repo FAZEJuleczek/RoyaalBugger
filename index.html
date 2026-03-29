@@ -39,44 +39,55 @@
         <div id="logs-container">Wczytywanie protokołów...</div>
     </div>
 
-    <script>
-        // W sekcji <script> Twojego pliku index.html:
-        const SB_URL = 'https://xropcpuoghapfumdcyqh.supabase.co';
-        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhyb3BjcHVvZ2hhcGZ1bWRjcXFoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3ODU1OTEsImV4cCI6MjA5MDM2MTU5MX0.WguBROzPFVR50j5zY7rWSinjk-D5Rl_EBwS_gRgL-EQ';
-        async function loadLogs() {
-            try {
-                const { data, error } = await supabaseClient.from('logs').select('*');
-                const container = document.getElementById('logs-container');
-                const statusBox = document.getElementById('db-status');
-                
-                if (error) throw error;
+        <script>
+    // TWOJE DANE KONFIGURACYJNE
+    const SB_URL = 'https://xropcpuoghapfumdcyqh.supabase.co';
+    // Używamy anon key (legacy) - jest najpewniejszy
+    const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhyb3BjcHVvZ2hhcGZ1bWRjcXFoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3ODU1OTEsImV4cCI6MjA5MDM2MTU5MX0.WguBROzPFVR50j5zY7rWSinjk-D5Rl_EBwS_gRgL-EQ';
+    
+    // Inicjalizacja klienta z dodatkowymi ustawieniami
+    const supabaseClient = supabase.createClient(SB_URL, SB_KEY, {
+      auth: { persistSession: false }
+    });
 
-                statusBox.innerText = "ONLINE";
-                statusBox.style.color = "#00f2ff";
-                document.getElementById('last-update').innerText = new Date().toLocaleTimeString();
+    async function loadLogs() {
+        try {
+            console.log("Próba nawiązania łączności...");
+            const { data, error } = await supabaseClient
+                .from('logs')
+                .select('*');
 
-                if (!data || data.length === 0) {
-                    container.innerHTML = '<p style="opacity: 0.5; font-style: italic;">Baza danych jest pusta. Czekam na dane z zewnątrz...</p>';
-                } else {
-                    container.innerHTML = '';
-                    data.reverse().forEach(log => {
-                        const div = document.createElement('div');
-                        div.className = 'bug-item';
-                        div.innerHTML = `<div style="font-size: 10px; opacity: 0.6; margin-bottom: 5px;">TYPE: ${log.type || 'UNKNOWN'}</div>
-                                         <div style="font-weight: bold; color: #ffae00;">${log.title}</div>
-                                         <div style="font-size: 13px; margin-top: 5px; opacity: 0.9;">${log.content}</div>`;
-                        container.appendChild(div);
-                    });
-                }
-            } catch (err) {
-                document.getElementById('db-status').innerText = "OFFLINE";
-                document.getElementById('db-status').style.color = "red";
-                console.error("Critical System Error:", err);
+            const container = document.getElementById('logs-container');
+            const statusBox = document.getElementById('db-status');
+            
+            if (error) throw error;
+
+            statusBox.innerText = "ONLINE";
+            statusBox.style.color = "#00f2ff";
+            document.getElementById('last-update').innerText = new Date().toLocaleTimeString();
+
+            if (!data || data.length === 0) {
+                container.innerHTML = '<p style="opacity: 0.5;">Baza pusta, ale połączenie OK.</p>';
+            } else {
+                container.innerHTML = '';
+                // Wyświetlamy wpisy, które widzę na Twoim screenie
+                data.reverse().forEach(log => {
+                    const div = document.createElement('div');
+                    div.className = 'bug-item';
+                    div.innerHTML = `<b>[${log.type}]</b> ${log.title}: ${log.content}`;
+                    container.appendChild(div);
+                });
             }
+        } catch (err) {
+            console.error("Błąd krytyczny:", err);
+            document.getElementById('db-status').innerText = "OFFLINE";
+            document.getElementById('db-status').style.color = "red";
+            document.getElementById('logs-container').innerHTML = "Błąd połączenia. Sprawdź konsolę (F12).";
         }
+    }
 
-        setInterval(loadLogs, 3000);
-        loadLogs();
+    setInterval(loadLogs, 3000); // Odświeżaj co 3 sekundy
+    loadLogs();
     </script>
 </body>
 </html>
