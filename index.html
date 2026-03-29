@@ -2,39 +2,47 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <title>RoyaalBugger C2 Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RoyaalBugger | C2 Dashboard</title>
     <style>
-        body { background: #0a0a0a; color: #00ff00; font-family: 'Courier New', monospace; padding: 20px; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .card { border: 1px solid #00ff00; padding: 15px; background: rgba(0, 255, 0, 0.05); }
-        h1, h2 { border-bottom: 1px solid #00ff00; padding-bottom: 5px; }
-        .status-online { color: #00ff00; font-weight: bold; }
-        .bug-item { color: #ffae00; margin-bottom: 10px; }
+        :root { --neon: #00f2ff; --bg: #050505; --card: rgba(255, 255, 255, 0.05); }
+        body { background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; }
+        .container { width: 90%; max-width: 1000px; background: var(--card); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 40px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; margin-bottom: 30px; }
+        .logo { font-size: 24px; font-weight: 800; letter-spacing: -1px; color: var(--neon); text-transform: uppercase; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .card { background: rgba(255,255,255,0.03); border-radius: 16px; padding: 20px; border: 1px solid rgba(255,255,255,0.05); transition: 0.3s; }
+        .card:hover { border-color: var(--neon); transform: translateY(-5px); }
+        .stat { font-size: 32px; font-weight: 700; color: var(--neon); margin: 10px 0; }
+        .label { font-size: 12px; text-transform: uppercase; opacity: 0.5; letter-spacing: 1px; }
+        .bug-item { background: rgba(255, 174, 0, 0.1); border-left: 3px solid #ffae00; padding: 10px; margin: 10px 0; border-radius: 4px; font-size: 14px; }
+        .pulse { width: 10px; height: 10px; background: var(--neon); border-radius: 50%; display: inline-block; margin-right: 10px; box-shadow: 0 0 10px var(--neon); animation: blink 1.5s infinite; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
-    <h1>🛰️ ROYAAL_BUGGER CONTROL CENTER</h1>
-    
-    <div class="grid">
-        <div class="card">
-            <h2>📊 Statystyki Systemu</h2>
-            <p>Status Serwera: <span class="status-online">ONLINE</span></p>
-            <p>Aktywne Beacony: 0</p>
-            <p>Ostatni Screen: brak</p>
+    <div class="container">
+        <div class="header">
+            <div class="logo">RoyaalBugger // C2</div>
+            <div style="font-size: 14px; opacity: 0.6;"><span class="pulse"></span> SYSTEM ACTIVE</div>
         </div>
-
-        <div class="card">
-            <h2>🚧 Unfinished Business</h2>
-            <div id="bug-list">
-                <div class="bug-item">[TODO] Połączenie Webhooka Discord z Pythonem</div>
-                <div class="bug-item">[TODO] System cyklicznych screenshotów (V3)</div>
+        
+        <div class="grid">
+            <div class="card">
+                <div class="label">Total Targets</div>
+                <div class="stat">01</div>
+                <div class="label" style="color: var(--neon);">Last connection: 2 mins ago</div>
+            </div>
+            <div class="card">
+                <div class="label">Session Status</div>
+                <div class="stat" style="color: #ffae00;">PENDING</div>
+                <div class="label">Waiting for tasking...</div>
             </div>
         </div>
-    </div>
 
-    <div class="card" style="margin-top: 20px;">
-        <h2>📝 Ostatnie Notatki</h2>
-        <p><em>Tu będą lądować Twoje opisy jak co zrobiłeś...</em></p>
+        <h3 style="margin-top: 40px; opacity: 0.8;">🚧 Unfinished Business</h3>
+        <div class="bug-item"><b>[HIGH]</b> Integrate Discord Webhook for visual exfiltration</div>
+        <div class="bug-item"><b>[MEDIUM]</b> Fix buffer reset on large PNG transfers</div>
     </div>
 </body>
 </html>
