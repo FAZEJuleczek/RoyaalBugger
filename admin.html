@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<body style="background: #111; color: #00f2ff; font-family: monospace; padding: 20px;">
+    <h3>🚀 OPERATOR CONSOLE</h3>
+    <input id="t" placeholder="Tytuł (np. SYSTEM)" style="width: 100%; margin-bottom: 10px;">
+    <textarea id="c" placeholder="Treść loga..." style="width: 100%; height: 100px; margin-bottom: 10px;"></textarea>
+    <button onclick="send()" style="background: #00f2ff; color: #000; border: none; padding: 10px 20px; cursor: pointer;">WYŚLIJ DO C2</button>
+    <p id="st"></p>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const supabaseClient = supabase.createClient('https://fvxodipuudkhzykpleul.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2eG9kaXB1dWRraHp5a3BsZXVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MDkyNjIsImV4cCI6MjA5MDM4NTI2Mn0.uBTUlc0-aoOzWsroJ1dvhV4JFbjJXnJ8EZjuMAAiQMQ');
+        
+        async function send() {
+            const { error } = await supabaseClient.from('logs').insert([{ 
+                title: document.getElementById('t').value, 
+                content: document.getElementById('c').value, 
+                type: 'OPERATOR' 
+            }]);
+            document.getElementById('st').innerText = error ? "BŁĄD: " + error.message : "WYSŁANO POMYŚLNIE!";
+        }
+    </script>
+</body>
+</html>
