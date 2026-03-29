@@ -42,7 +42,7 @@
     <script>
         // TWOJE DANE KONFIGURACYJNE (PROJEKT FRANKFURT)
         const SB_URL = 'https://fvxodipuudkhzykpleul.supabase.co';
-        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2eG9kaXB1dWRkaHp5a3BsZXVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MDkyNjIsImV4cCI6MjA5MDM4NTI2Mn0.uBTUlc0-aoOzWsroJ1dvhV4JFbjJXnJ8EZjuMAAiQMQ';
+        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2eG9kaXB1dWRraHp5a3BsZXVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MDkyNjIsImV4cCI6MjA5MDM4NTI2Mn0.uBTUlc0-aoOzWsroJ1dvhV4JFbjJXnJ8EZjuMAAiQMQ';
 
         // Inicjalizacja klienta
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
@@ -54,35 +54,4 @@
                     .select('*');
 
                 const container = document.getElementById('logs-container');
-                const statusBox = document.getElementById('db-status');
-                
-                if (error) throw error;
-
-                statusBox.innerText = "ONLINE";
-                statusBox.style.color = "#00f2ff";
-                document.getElementById('last-update').innerText = new Date().toLocaleTimeString();
-
-                if (!data || data.length === 0) {
-                    container.innerHTML = '<p style="opacity: 0.5;">Połączono. Czekam na dane w tabeli logs...</p>';
-                } else {
-                    container.innerHTML = '';
-                    data.reverse().forEach(log => {
-                        const div = document.createElement('div');
-                        div.className = 'bug-item';
-                        div.innerHTML = `<b>[${log.type || 'INFO'}]</b> ${log.title}: ${log.content}`;
-                        container.appendChild(div);
-                    });
-                }
-            } catch (err) {
-                console.error("Błąd połączenia:", err);
-                document.getElementById('db-status').innerText = "OFFLINE";
-                document.getElementById('db-status').style.color = "red";
-                document.getElementById('logs-container').innerHTML = "Błąd klucza lub brak tabeli 'logs'.";
-            }
-        }
-
-        setInterval(loadLogs, 3000);
-        loadLogs();
-    </script>
-</body>
-</html>
+                const statusBox = document.getElementById('db-
