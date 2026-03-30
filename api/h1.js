@@ -1,17 +1,25 @@
-async function loadH1() {
-    const out = document.getElementById('h1-stream');
+export default async function handler(req, res) {
+    const h1Auth = process.env.H1_TOKEN; 
+
+    // Diagnostyka: Jeśli zapomniałeś dodać tokena w Vercelu, serwer o tym powie
+    if (!h1Auth) {
+        return res.status(500).json({ error: "Brak zmiennej H1_TOKEN w ustawieniach Vercel!" });
+    }
+
     try {
-        // Pytasz swój własny serwer, a on ma klucze ukryte!
-        const response = await fetch('/api/h1'); 
-        const res = await response.json();
-        
-        if (res.data) {
-            out.innerHTML = res.data.map(r => `
-                <div class="item h1-item">
-                    <b>#${r.id}</b>: ${r.attributes.title}
-                </div>`).join('');
-        }
-    } catch (e) {
-        out.innerHTML = "Agent nie odpowiada...";
+        const url = 'https://api.hackerone.com/v1/reports';
+        // UWAGA: Na serwerze (Backend) nie potrzebujesz cors-anywhere! 
+        // Serwer może gadać z H1 bezpośrednio.
+        const response = await fetch(url, {
+            headers: {
+                'Authorization': `Basic ${h1Auth.trim()}`,
+                'Accept': 'application/json'
+            }
+        });
+
+        const data = await response.json();
+        res.status(200).json(data);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
 }
