@@ -116,4 +116,19 @@
 
         async function loadRSS() {
             try {
-                const res = await fetch(
+                const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent("https://hackerone.com/hacktivity.rss")}`);
+                const d = await res.json();
+                if(d.items) {
+                    document.getElementById('rss-feed').innerHTML = d.items.slice(0, 5).map(i => `
+                        <div class="feed-item"><b>${i.author}</b>: ${i.title.substring(0, 40)}...</div>
+                    `).join('');
+                }
+            } catch (e) { document.getElementById('rss-feed').innerText = "RSS Offline."; }
+        }
+
+        // Start
+        loadData();
+        loadRSS();
+    </script>
+</body>
+</html>
