@@ -12,7 +12,7 @@ export default async function handler(req, res) {
         // Serwer może gadać z H1 bezpośrednio.
         const response = await fetch(url, {
             headers: {
-                'Authorization': `Basic ${h1Auth.trim()}`,
+                'Authorization': `${h1Auth.trim()}`,
                 'Accept': 'application/json'
             }
         });
