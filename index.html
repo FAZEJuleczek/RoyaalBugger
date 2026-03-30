@@ -141,4 +141,34 @@
                 const acc = data.filter(l => l.content?.toLowerCase().includes('triaged')).length;
                 const total = data.length;
                 document.getElementById('yt-bounty-stats').innerHTML = `
-                    Przyjęte raporty: <b
+                    Przyjęte raporty: <b style="color:#00ff00">${acc}</b><br>
+                    Wszystkie wysłane: <b>${total}</b><br>
+                    Skuteczność: <b>${total > 0 ? Math.round((acc/total)*100) : 0}%</b>
+                `;
+            }
+        }
+
+        async function loadGlobalFeeds() {
+            const api_url = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent("https://hackerone.com/hacktivity.rss")}`;
+            try {
+                const response = await fetch(api_url);
+                const data = await response.json();
+                if (data.items) {
+                    document.getElementById('rss-feed').innerHTML = data.items.slice(0, 5).map(item => `
+                        <div class="feed-item">
+                            <b>${item.author || 'HackerOne'}</b>: ${item.title.substring(0, 60)}...
+                            <a href="${item.link}" target="_blank">SZCZEGÓŁY →</a>
+                        </div>
+                    `).join('');
+                }
+            } catch (e) { console.error("Feed error"); }
+        }
+
+        _supabase.channel('any').on('postgres_changes', { event: '*', schema: 'public', table: 'logs' }, () => loadSupabaseLogs()).subscribe();
+        
+        loadSupabaseLogs();
+        loadGlobalFeeds();
+        setInterval(loadGlobalFeeds, 60000);
+    </script>
+</body>
+</html>
