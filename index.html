@@ -6,82 +6,52 @@
     <title>RoyaalBugger | Intelligence C2</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { 
-            --neon: #00f2ff; 
-            --bg: #050505; 
-            --card: rgba(255, 255, 255, 0.05); 
-            --gold: #ffae00; 
-            --yt: #ff0000;
-        }
+        :root { --neon: #00f2ff; --bg: #050505; --card: rgba(255, 255, 255, 0.05); --gold: #ffae00; --yt: #ff0000; }
         body { background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; margin: 0; padding: 10px; display: flex; justify-content: center; min-height: 100vh; box-sizing: border-box; overflow-x: hidden; }
-        
-        /* --- SIDEBAR --- */
-        #sidebar {
-            position: fixed; top: 0; left: -280px; width: 260px; height: 100%;
-            background: rgba(0, 0, 0, 0.95); backdrop-filter: blur(20px);
-            border-right: 1px solid var(--neon); transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            z-index: 9999; padding-top: 80px;
-        }
+        #sidebar { position: fixed; top: 0; left: -280px; width: 260px; height: 100%; background: rgba(0, 0, 0, 0.95); backdrop-filter: blur(20px); border-right: 1px solid var(--neon); transition: 0.3s; z-index: 9999; padding-top: 80px; }
         #sidebar.open { left: 0; }
-        .nav-item {
-            padding: 15px 25px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05);
-            text-transform: uppercase; font-size: 11px; letter-spacing: 2px; opacity: 0.6; transition: 0.3s;
-        }
+        .nav-item { padding: 15px 25px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); text-transform: uppercase; font-size: 11px; letter-spacing: 2px; opacity: 0.6; }
         .nav-item:hover { opacity: 1; color: var(--neon); background: rgba(0,242,255,0.05); }
-
-        /* --- PRZYCISK MENU --- */
-        #menu-trigger {
-            position: fixed; top: 25px; left: 25px; z-index: 10000;
-            background: var(--card); border: 1px solid var(--neon);
-            color: var(--neon); padding: 10px 12px; border-radius: 10px; cursor: pointer;
-        }
-
-        .container { width: 100%; max-width: 1000px; background: var(--card); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 30px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); margin-top: 20px; transition: 0.5s; }
+        #menu-trigger { position: fixed; top: 25px; left: 25px; z-index: 10000; background: var(--card); border: 1px solid var(--neon); color: var(--neon); padding: 10px; border-radius: 10px; cursor: pointer; }
+        .container { width: 100%; max-width: 1000px; background: var(--card); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 30px; margin-top: 20px; }
         .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; margin-bottom: 30px; padding-left: 50px; }
         .logo { font-size: 20px; font-weight: 800; color: var(--neon); text-transform: uppercase; letter-spacing: 2px; }
-        
-        /* WIDOKI */
         .view { display: none; }
         .active-view { display: block; animation: fadeIn 0.5s; }
-
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .card { background: rgba(255,255,255,0.02); border-radius: 16px; padding: 20px; border: 1px solid rgba(255,255,255,0.05); min-height: 250px; }
-        .section-title { font-size: 12px; letter-spacing: 2px; text-transform: uppercase; opacity: 0.5; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
-
-        /* Styl logów (Poprawiony pod Twoje dane) */
-        .bug-item { background: rgba(255, 174, 0, 0.05); border-left: 3px solid var(--gold); padding: 12px; margin: 10px 0; border-radius: 6px; font-size: 13px; line-height: 1.4; }
+        .section-title { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; opacity: 0.5; margin-bottom: 15px; }
+        .bug-item { background: rgba(255, 174, 0, 0.05); border-left: 3px solid var(--gold); padding: 12px; margin: 10px 0; border-radius: 6px; font-size: 13px; }
         .feed-item { background: rgba(0, 242, 255, 0.05); border-left: 3px solid var(--neon); padding: 12px; margin: 10px 0; border-radius: 6px; font-size: 13px; }
-
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } .header { padding-left: 0; text-align: center; } }
+        @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } .header { padding-left: 0; } }
     </style>
 </head>
 <body>
 
-    <button id="menu-trigger" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+    <button id="menu-trigger" onclick="toggleSidebar()">☰</button>
 
     <nav id="sidebar">
         <div class="nav-item" onclick="showView('main')">🏠 Intelligence Hub</div>
-        <div class="nav-item" onclick="showView('yt')" style="color: var(--yt);">🔴 YouTube Mode</div>
+        <div class="nav-item" onclick="showView('yt')" style="color: var(--yt);">🔴 YT MODE</div>
         <div class="nav-item" onclick="window.location.href='admin.html'">⌨️ Terminal C2</div>
     </nav>
 
     <div class="container">
         <div class="header">
             <div class="logo" id="main-logo">ROYAAL_INTELLIGENCE</div>
-            <div id="status-tag" style="font-size: 10px; opacity: 0.5; letter-spacing: 1px;">STATUS: ONLINE</div>
+            <div style="font-size: 10px; opacity: 0.5;">STATUS: ONLINE</div>
         </div>
 
         <div id="view-main" class="view active-view">
             <div class="grid">
                 <div class="card">
-                    <div class="section-title"><span style="color:var(--gold)">●</span> PRIVATE LOGS</div>
-                    <div id="logs-container">Inicjowanie strumienia danych...</div>
+                    <div class="section-title">● PRIVATE LOGS</div>
+                    <div id="logs-container">Wczytywanie...</div>
                 </div>
-
                 <div class="card">
-                    <div class="section-title"><span style="color:var(--neon)">●</span> GLOBAL BUG FEED</div>
-                    <div id="rss-feed">Przeszukiwanie HackerOne...</div>
+                    <div class="section-title">● GLOBAL BUG FEED</div>
+                    <div id="rss-feed">Inicjowanie...</div>
                 </div>
             </div>
         </div>
@@ -89,20 +59,61 @@
         <div id="view-yt" class="view">
             <div class="grid">
                 <div class="card" style="border-color: var(--yt);">
-                    <div class="section-title"><span style="color:var(--yt)">●</span> YT SUBSCRIBERS</div>
+                    <div class="section-title">● YT SUBS</div>
                     <span style="font-size: 32px; font-weight: 800; color: var(--yt);">1,240</span>
                 </div>
                 <div class="card">
-                    <div class="section-title"><span style="color:var(--gold)">●</span> DATA RECORDS</div>
-                    <div id="yt-stats-count" style="font-size: 24px; font-weight: 800; margin-top: 10px;">0</div>
+                    <div class="section-title">● DATA COUNT</div>
+                    <div id="yt-stats" style="font-size: 24px; font-weight: 800;">0</div>
                 </div>
-            </div>
-            <div class="card" style="margin-top: 15px;">
-                <div class="section-title">SYSTEM ANALYTICS</div>
-                <p style="font-size: 13px; opacity: 0.7;">Wszystkie systemy operacyjne działają w normie. Brak wykrytych anomalii w strumieniu Supabase.</p>
             </div>
         </div>
     </div>
 
     <script>
-        // --- POJEDYNCZY OBIEKT KONFIGURACJI (Brak b
+        // Funkcje globalne zdefiniowane na samym początku, żeby uniknąć ReferenceError
+        window.toggleSidebar = function() {
+            document.getElementById('sidebar').classList.toggle('open');
+        };
+
+        window.showView = function(viewId) {
+            console.log("Zmieniam widok na:", viewId);
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active-view'));
+            const targetView = document.getElementById('view-' + viewId);
+            if (targetView) targetView.classList.add('active-view');
+            
+            const logo = document.getElementById('main-logo');
+            if(viewId === 'yt') {
+                logo.style.color = 'var(--yt)';
+                logo.innerText = 'ROYAAL_CREATOR';
+            } else {
+                logo.style.color = 'var(--neon)';
+                logo.innerText = 'ROYAAL_INTELLIGENCE';
+            }
+            document.getElementById('sidebar').classList.remove('open');
+        };
+
+        const SB_URL = 'https://fvxodipuudkhzykpleul.supabase.co';
+        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2eG9kaXB1dWRraHp5a3BsZXVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MDkyNjIsImV4cCI6MjA5MDM4NTI2Mn0.uBTUlc0-aoOzWsroJ1dvhV4JFbjJXnJ8EZjuMAAiQMQ';
+        const _supabase = supabase.createClient(SB_URL, SB_KEY);
+
+        async function loadData() {
+            const container = document.getElementById('logs-container');
+            try {
+                const { data, error } = await _supabase.from('logs').select('*');
+                if (error) throw error;
+                if (data) {
+                    container.innerHTML = data.reverse().slice(0, 5).map(l => `
+                        <div class="bug-item"><b>${l.title || 'LOG'}</b>: ${l.content || '...'}</div>
+                    `).join('');
+                    document.getElementById('yt-stats').innerText = data.length;
+                }
+            } catch (e) {
+                container.innerHTML = "Błąd bazy.";
+                console.error(e);
+            }
+        }
+
+        async function loadRSS() {
+            try {
+                const res = await fetch(
