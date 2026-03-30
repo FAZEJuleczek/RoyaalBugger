@@ -1,19 +1,17 @@
 export default async function handler(req, res) {
     const h1Auth = process.env.H1_TOKEN;
 
-    if (!h1Auth) {
-        return res.status(500).json({ error: "Brak zmiennej H1_TOKEN w Vercelu!" });
+    if (!h1Auth || !h1Auth.includes(':')) {
+        return res.status(500).json({ error: "Błąd formatu w Vercel! Ma być login:token" });
     }
 
-    // Czyścimy token tylko z ewentualnych spacji i słowa "Basic "
-    const finalToken = h1Auth.trim().replace('Basic ', '');
+    const base64Auth = Buffer.from(h1Auth.trim()).toString('base64');
 
     try {
         const response = await fetch('https://api.hackerone.com/v1/reports', {
             method: 'GET',
             headers: {
-                // Wysyłamy surowe Base64, które masz w Vercelu
-                'Authorization': `Basic ${finalToken}`,
+                'Authorization': `Basic ${base64Auth}`,
                 'Accept': 'application/json'
             }
         });
@@ -22,15 +20,14 @@ export default async function handler(req, res) {
 
         if (!response.ok) {
             return res.status(response.status).json({ 
-                error: "HackerOne nadal mówi NIE", 
-                h1_status: response.status,
+                error: "HackerOne odrzucił ten token", 
+                status: response.status,
                 h1_response: data 
             });
         }
 
-        // Jeśli tu wejdzie, to znaczy że KLUCZ JEST DOBRY
         return res.status(200).json(data);
     } catch (error) {
-        return res.status(500).json({ error: "Server Crash: " + error.message });
+        return res.status(500).json({ error: "Crash: " + error.message });
     }
 }
