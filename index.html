@@ -2,45 +2,69 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RoyaalBugger | Live C2</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ROYAAL C2 DASHBOARD</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --neon: #00f2ff; --bg: #050505; --card: rgba(255, 255, 255, 0.05); --google: #4285F4; --h1: #ffffff; }
-        body { background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; margin: 0; padding: 10px; display: flex; justify-content: center; min-height: 100vh; }
-        .container { width: 100%; max-width: 1200px; background: var(--card); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 20px; margin-top: 10px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
-        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; margin-bottom: 20px; }
-        .logo { font-size: 16px; font-weight: 900; color: var(--neon); letter-spacing: 2px; }
-        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
-        .card { background: rgba(0,0,0,0.3); border-radius: 16px; padding: 15px; border: 1px solid rgba(255,255,255,0.05); min-height: 500px; }
-        .section-title { font-size: 10px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
-        .item { background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px; margin-bottom: 10px; border-left: 3px solid #333; font-size: 12px; transition: 0.3s; }
-        .item:hover { background: rgba(255,255,255,0.06); }
-        .google-item { border-left-color: var(--google); }
-        .h1-item { border-left-color: var(--h1); }
-        .item b { display: block; margin-bottom: 4px; color: var(--neon); font-size: 13px; }
-        .item small { opacity: 0.5; display: block; margin-top: 8px; font-size: 10px; }
-        @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+        body { background: #050505; color: #fff; font-family: 'Courier New', monospace; margin: 0; overflow-x: hidden; }
+        
+        /* Menu Boczne */
+        #sidebar {
+            position: fixed; top: 0; left: -280px; width: 280px; height: 100%;
+            background: #0a0a0a; border-right: 1px solid #333;
+            transition: 0.3s; z-index: 999; padding-top: 80px;
+        }
+        #sidebar.open { left: 0; }
+        .nav-item { padding: 15px 25px; cursor: pointer; border-bottom: 1px solid #222; transition: 0.3s; }
+        .nav-item:hover { background: #1a1a1a; }
+        .yt-item { color: #ff0000; font-weight: bold; border: 1px solid #ff0000; margin: 20px; border-radius: 5px; text-align: center; }
+
+        /* Przycisk Menu */
+        #menu-btn {
+            position: fixed; top: 20px; left: 20px; z-index: 1000;
+            background: #000; color: #fff; border: 1px solid #333;
+            padding: 10px 15px; cursor: pointer; border-radius: 5px;
+        }
+
+        /* Kontenery widoków */
+        .view { display: none; padding: 80px 20px; max-width: 1000px; margin: 0 auto; }
+        .active { display: block; }
+
+        /* Statystyki YT */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; }
+        .stat-card { background: #111; padding: 20px; border-radius: 10px; text-align: center; border-left: 5px solid #444; }
+        .log-entry { background: #111; padding: 15px; border: 1px solid #222; margin-bottom: 10px; border-radius: 5px; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <div class="logo">● ROYAAL_BUGGER_INTELLIGENCE</div>
-            <a href="admin.html" style="color:var(--neon); text-decoration:none; font-size:11px; font-weight:bold; border:1px solid var(--neon); padding:5px 10px; border-radius:6px;">TERMINAL</a>
-        </div>
-        <div class="grid">
-            <div class="card">
-                <div class="section-title" style="color:var(--google)">● Google VRP Status</div>
-                <div id="google-list"></div>
+
+    <button id="menu-btn" onclick="toggleMenu()">☰ MENU</button>
+
+    <div id="sidebar">
+        <div class="nav-item" onclick="showView('dashboard')">🏠 DASHBOARD</div>
+        <div class="nav-item yt-item" onclick="showView('yt')">🔴 YT MODE</div>
+        <div class="nav-item" style="opacity: 0.3;">🛠️ PROJEKTY</div>
+    </div>
+
+    <div id="dashboard" class="view active">
+        <h1 style="color: #00ff00;">> ROOT@ROYAAL_C2:~/LOGS_</h1>
+        <div id="logs-container">Ładowanie logów...</div>
+    </div>
+
+    <div id="yt" class="view">
+        <h1 style="color: #ff0000; text-shadow: 0 0 10px #ff0000;">🔴 YT CREATOR COMMAND</h1>
+        <div class="stats-grid">
+            <div class="stat-card" style="border-left-color: #00ff00;">
+                <p>PRZYJĘTO</p><h2 id="stat-accepted">0</h2>
             </div>
-            <div class="card">
-                <div class="section-title" style="color:var(--h1)">● HackerOne Activity</div>
-                <div id="h1-list"></div>
+            <div class="stat-card" style="border-left-color: #ffcc00;">
+                <p>OCZEKUJE</p><h2 id="stat-pending">0</h2>
             </div>
-            <div class="card">
-                <div class="section-title" style="color:#ffae00">● Manual Logs</div>
-                <div id="manual-list"></div>
+            <div class="stat-card" style="border-left-color: #ff4444;">
+                <p>ODRZUCONO</p><h2 id="stat-rejected">0</h2>
+            </div>
+            <div class="stat-card" style="border-left-color: #ff0000;">
+                <p>YT SUBS</p><h2>1,240</h2>
             </div>
         </div>
     </div>
@@ -48,22 +72,51 @@
     <script>
         const SB_URL = 'https://fvxodipuudkhzykpleul.supabase.co';
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2eG9kaXB1dWRraHp5a3BsZXVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MDkyNjIsImV4cCI6MjA5MDM4NTI2Mn0.uBTUlc0-aoOzWsroJ1dvhV4JFbjJXnJ8EZjuMAAiQMQ';
-        const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
+        const _supabase = supabase.createClient(SB_URL, SB_KEY);
 
-        async function sync() {
-            const { data } = await supabaseClient.from('logs').select('*');
-            if (!data) return;
-            const logs = data.reverse();
+        function toggleMenu() { document.getElementById('sidebar').classList.toggle('open'); }
 
-            const render = (l, cls) => `<div class="item ${cls}"><b>${l.title}</b>${l.content.substring(0, 150)}${l.content.length > 150 ? '...' : ''}<small>${new Date(l.created_at).toLocaleString()}</small></div>`;
-
-            document.getElementById('google-list').innerHTML = logs.filter(l => l.type === 'GOOGLE').map(l => render(l, 'google-item')).join('');
-            document.getElementById('h1-list').innerHTML = logs.filter(l => l.type === 'H1').map(l => render(l, 'h1-item')).join('');
-            document.getElementById('manual-list').innerHTML = logs.filter(l => l.type !== 'GOOGLE' && l.type !== 'H1').map(l => render(l, '')).join('');
+        function showView(viewId) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+            toggleMenu();
         }
 
-        sync();
-        setInterval(sync, 5000);
+        async function fetchLogs() {
+            const { data, error } = await _supabase.from('logs').select('*').order('created_at', { ascending: false });
+            if (data) {
+                renderLogs(data);
+                calculateStats(data);
+            }
+        }
+
+        function renderLogs(logs) {
+            const container = document.getElementById('logs-container');
+            container.innerHTML = logs.map(log => `
+                <div class="log-entry">
+                    <span style="color: #555">[${new Date(log.created_at).toLocaleTimeString()}]</span>
+                    <strong style="color: ${log.type === 'H1' ? '#00aaff' : '#ffcc00'}"> ${log.type} </strong>
+                    <span>${log.title}</span>
+                </div>
+            `).join('');
+        }
+
+        function calculateStats(logs) {
+            const acc = logs.filter(l => l.content?.toLowerCase().includes('triaged')).length;
+            const pend = logs.filter(l => l.content?.toLowerCase().includes('new')).length;
+            const rej = logs.filter(l => l.content?.toLowerCase().includes('n/a')).length;
+            
+            document.getElementById('stat-accepted').innerText = acc;
+            document.getElementById('stat-pending').innerText = pend;
+            document.getElementById('stat-rejected').innerText = rej;
+        }
+
+        // Real-time update
+        _supabase.channel('logs').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'logs' }, payload => {
+            fetchLogs();
+        }).subscribe();
+
+        fetchLogs();
     </script>
 </body>
 </html>
