@@ -47,57 +47,55 @@
 </div>
 
 <script>
-    // --- TWOJE CENTRUM DOWODZENIA ---
+    // Konfiguracja (bez kluczy!)
     const CONFIG = {
-        // Skoro lecisz w Env Vars na Vercelu, to tutaj wrzuć tylko odniesienia
-        // Jeśli to czysty JS, wklej je tu RAZ, a potem zrób repo PRIVATE.
-        h1Auth: 'Basic cm95YWFsOkw0RVdWSE9YTHdLYjBnaG1PTERDZWFKAL...', 
-        supaKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...', 
         supaUrl: 'https://fvxodipuudkhzykpleul.supabase.co'
     };
 
-    const _supa = supabase.createClient(CONFIG.supaUrl, CONFIG.supaKey);
-    const proxy = 'https://cors-anywhere.herokuapp.com/';
-
-    async function loadEverything() {
-        const h1Out = document.getElementById('h1-stream');
-        const supaOut = document.getElementById('supa-stream');
-
-        // 1. POBIERANIE Z HACKERONE (TYLKO TOKEN)
+    // 1. ŁADOWANIE LOGÓW Z HACKERONE PRZEZ TWÓJ SERWER (API)
+    async function loadH1() {
+        const out = document.getElementById('h1-stream');
         try {
-            const response = await fetch(proxy + 'https://api.hackerone.com/v1/reports', {
-                headers: { 
-                    'Authorization': CONFIG.h1Auth, 
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            });
-
+            // Pytamy Twój plik api/h1.js, który ma dostęp do kluczy na Vercelu
+            const response = await fetch('/api/h1');
             const res = await response.json();
-            if (res.data) {
-                h1Out.innerHTML = res.data.map(r => `
-                    <div class="item h1-item">
-                        <b style="color:var(--gold)">#${r.id}</b> [${r.attributes.state}]<br>${r.attributes.title}
-                    </div>`).join('');
-            }
-        } catch (e) { h1Out.innerHTML = "Błąd H1 (Sprawdź Proxy/Token)"; }
 
-        // 2. POBIERANIE Z SUPABASE
-        try {
-            const { data } = await _supa.from('logs').select('*');
-            if (data) {
-                supaOut.innerHTML = data.reverse().map(l => `
-                    <div class="item supa-item"><b>${l.title}</b>: ${l.content}</div>
-                `).join('');
+            if (res.data && res.data.length > 0) {
+                out.innerHTML = res.data.map(r => `
+                    <div class="item h1-item">
+                        <b style="color:var(--gold)">#${r.id}</b> [${r.attributes.state}]<br>
+                        ${r.attributes.title}
+                    </div>`).join('');
+            } else {
+                out.innerHTML = "Brak raportów lub błąd autoryzacji.";
             }
-        } catch (e) { supaOut.innerHTML = "Błąd Supy."; }
+        } catch (e) {
+            out.innerHTML = "Agent H1 nie odpowiada (Sprawdź Vercel Logs).";
+        }
+    }
+
+    // 2. ŁADOWANIE SUPABASE (Jeśli masz tam publiczne logi)
+    async function loadSupa() {
+        const out = document.getElementById('supa-stream');
+        try {
+            // Tutaj możesz albo zrobić drugie API w folderze /api, 
+            // albo użyć klucza publicznego, jeśli baza nie jest tajna.
+            // Na razie zostawiamy miejsce na Twoje logi.
+            out.innerHTML = "Ładowanie logów z bazy...";
+        } catch (e) { out.innerHTML = "Błąd bazy."; }
     }
 
     // START
-    window.onload = loadEverything;
+    window.onload = () => {
+        loadH1();
+        loadSupa();
+    };
 
-    // Realtime dla Supabase (żeby logi wpadały same!)
-    _supa.channel('any').on('postgres_changes', { event: '*', schema: 'public', table: 'logs' }, loadEverything).subscribe();
+    // ZEGAR
+    setInterval(() => {
+        const c = document.getElementById('clock');
+        if(c) c.innerText = new Date().toLocaleTimeString();
+    }, 1000);
 </script>
     
 </body>
