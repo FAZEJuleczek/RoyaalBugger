@@ -1,39 +1,30 @@
 export default async function handler(req, res) {
-    const h1Auth = process.env.H1_TOKEN;
+    const h1Username = process.env.H1_USERNAME;
+    const h1Token = process.env.H1_TOKEN;
 
-    // Sprawdzenie czy zmienna w ogóle istnieje w Vercelu
-    if (!h1Auth) {
-        return res.status(500).json({ error: "Brak zmiennej H1_TOKEN w ustawieniach Vercel!" });
+    if (!h1Username || !h1Token) {
+        return res.status(500).json({ 
+            error: "Brak zmiennych H1_USERNAME lub H1_TOKEN w Vercelu!" 
+        });
     }
 
     try {
-        const url = 'https://api.hackerone.com/v1/reports';
+        const credentials = btoa(`${h1Username}:${h1Token}`);
         
-        const response = await fetch(url, {
-            method: 'GET',
+        const response = await fetch('https://api.hackerone.com/v1/hackers/me/reports', {
             headers: {
-                // Bearer z Twoim tokenem i obowiązkowy przecinek na końcu linii!
-                'Authorization': `Bearer ${h1Auth.trim()}`,
+                'Authorization': `Basic ${credentials}`,
                 'Accept': 'application/json'
             }
         });
 
-        // Pobieramy dane z HackerOne
-        const data = await response.json();
-
-        // Jeśli H1 odpowie błędem (np. 401), przekaż to do dashboardu
         if (!response.ok) {
-            return res.status(response.status).json({ 
-                error: "HackerOne odmówił dostępu",
-                details: data 
-            });
+            throw new Error(`API error: ${response.status}`);
         }
 
-        // Jeśli wszystko ok, wyślij raporty
-        return res.status(200).json(data);
-
+        const data = await response.json();
+        res.status(200).json(data);
     } catch (error) {
-        // Jeśli serwer Vercela padnie (np. błąd składni)
-        return res.status(500).json({ error: "Błąd serwera: " + error.message });
+        res.status(500).json({ error: error.message });
     }
 }
