@@ -1,25 +1,18 @@
 export default async function handler(req, res) {
     const h1Auth = process.env.H1_TOKEN;
 
-    // 1. Sprawdzamy czy zmienna w ogóle jest
-    if (!h1Auth) {
-        return res.status(500).json({ error: "Brak H1_TOKEN w Vercel Settings!" });
-    }
-
-    // 2. Sprawdzamy czy format jest poprawny (royaal:klucz)
-    if (!h1Auth.includes(':')) {
+    if (!h1Auth || !h1Auth.includes(':')) {
         return res.status(500).json({ 
-            error: "Zly format tokena!", 
-            widziany_tekst: h1Auth.substring(0, 5) + "...",
-            tip: "Wpisz w Vercelu surowe royaal:klucz (bez Base64)" 
+            error: "Błąd konfiguracji Vercel",
+            msg: "Upewnij się, że H1_TOKEN to royaal:klucz"
         });
     }
 
     try {
-        // 3. Kodujemy do Base64
+        // Kodujemy 'royaal:klucz' do Base64
         const base64Auth = Buffer.from(h1Auth.trim()).toString('base64');
 
-        // 4. Wysyłamy do HackerOne
+        // Używamy wbudowanego fetch (Node 20+)
         const response = await fetch('https://api.hackerone.com/v1/reports', {
             method: 'GET',
             headers: {
@@ -30,23 +23,17 @@ export default async function handler(req, res) {
 
         const data = await response.json();
 
-        // 5. Obsługa błędów autoryzacji (401)
         if (!response.ok) {
             return res.status(response.status).json({ 
-                error: "HackerOne nadal mówi NIE", 
+                error: "HackerOne mówi: Nie", 
                 status: response.status,
-                debug: {
-                    login_uzyty: h1Auth.split(':')[0],
-                    dlugosc_tokena: h1Auth.split(':')[1]?.length,
-                    h1_msg: data 
-                }
+                h1_response: data 
             });
         }
 
-        // 6. SUKCES! Zwracamy raporty
+        // Zwracamy raporty
         return res.status(200).json(data);
-
     } catch (error) {
-        return res.status(500).json({ error: "Server Crash: " + error.message });
+        return res.status(500).json({ error: "Błąd serwera: " + error.message });
     }
 }
