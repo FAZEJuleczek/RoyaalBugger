@@ -13,7 +13,7 @@ export default async function handler(req, res) {
         const response = await fetch('https://api.hackerone.com/v1/reports', {
             method: 'GET',
             headers: {
-                'Authorization': `Basic ${cleanToken}`,
+                'Authorization': `Bearer ${h1Auth.trim()}`
                 'Accept': 'application/json'
             }
         });
