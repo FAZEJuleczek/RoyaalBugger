@@ -1,20 +1,16 @@
 export default async function handler(req, res) {
-    // Pobieramy TYLKO token. Upewnij się, że w Vercelu nazywa się H1_TOKEN
-    const h1Auth = process.env.H1_TOKEN;
+    const h1Auth = process.env.H1_TOKEN; // Tu ma być Twój Base64 z Vercela
 
     if (!h1Auth) {
-        return res.status(500).json({ 
-            error: "Błąd konfiguracji Vercel", 
-            details: "Nie znaleziono zmiennej H1_TOKEN w Settings -> Environment Variables" 
-        });
+        return res.status(500).json({ error: "Brak tokena H1_TOKEN w Vercelu!" });
     }
 
     try {
         const response = await fetch('https://api.hackerone.com/v1/reports', {
             method: 'GET',
             headers: {
-                // Czyścimy token i dodajemy Bearer
-                'Authorization': `Bearer ${h1Auth.trim()}`,
+                // Dokładnie tak, jak napisałeś: Basic + spacja + zakodowany ciąg
+                'Authorization': `Basic ${h1Auth.trim()}`,
                 'Accept': 'application/json'
             }
         });
@@ -23,8 +19,7 @@ export default async function handler(req, res) {
 
         if (!response.ok) {
             return res.status(response.status).json({ 
-                error: "HackerOne odrzucił dostęp", 
-                status: response.status,
+                error: "HackerOne nie przyjął Basic Auth", 
                 details: data 
             });
         }
