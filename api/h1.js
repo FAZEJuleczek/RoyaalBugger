@@ -5,9 +5,13 @@ export default async function handler(req, res) {
         return res.status(500).json({ error: "Brak tokena w Vercelu!" });
     }
 
-    // Czyścimy wszystko - usuwamy "Basic " jeśli tam jest i białe znaki
-    const cleanToken = h1Auth.replace('Basic ', '').trim();
+// ZAMIAST TEGO:
+// const cleanToken = h1Auth.replace('Basic ', '').trim();
 
+// WKLEJ TO:
+   const cleanToken = Buffer.from(h1Auth.trim()).toString('base64');
+
+    
     try {
         const response = await fetch('https://api.hackerone.com/v1/reports', {
             method: 'GET',
