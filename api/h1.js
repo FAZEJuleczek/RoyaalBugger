@@ -4,15 +4,15 @@ export default async function handler(req, res) {
     if (!h1Auth || !h1Auth.includes(':')) {
         return res.status(500).json({ 
             error: "Błąd konfiguracji Vercel",
-            msg: "Upewnij się, że H1_TOKEN to royaal:klucz"
+            msg: "Wpisz w Environment Variables H1_TOKEN jako: royaal:TWÓJ_TOKEN"
         });
     }
 
     try {
-        // Kodujemy 'royaal:klucz' do Base64
+        // Kodujemy Twoje dane do Base64
         const base64Auth = Buffer.from(h1Auth.trim()).toString('base64');
 
-        // Używamy wbudowanego fetch (Node 20+)
+        // TESTUJEMY ENDPOINT /v1/me (sprawdzenie tożsamości)
         const response = await fetch('https://api.hackerone.com/v1/me', {
             method: 'GET',
             headers: {
@@ -25,14 +25,19 @@ export default async function handler(req, res) {
 
         if (!response.ok) {
             return res.status(response.status).json({ 
-                error: "HackerOne mówi: Nie", 
+                error: "HackerOne nadal Cię nie rozpoznaje", 
                 status: response.status,
-                h1_response: data 
+                h1_response: data,
+                uzyty_login: h1Auth.split(':')[0]
             });
         }
 
-        // Zwracamy raporty
-        return res.status(200).json(data);
+        // Jeśli sukces, zobaczysz swoje dane profilowe z H1
+        return res.status(200).json({
+            message: "AUTORYZACJA DZIAŁA!",
+            profile_data: data
+        });
+
     } catch (error) {
         return res.status(500).json({ error: "Błąd serwera: " + error.message });
     }
