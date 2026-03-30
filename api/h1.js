@@ -9,7 +9,7 @@ export default async function handler(req, res) {
         const auth = Buffer.from(`${user}:${token.trim()}`).toString('base64');
 
         // Walimy prosto w endpoint dla hakerów
-        const response = await fetch('https://api.hackerone.com/v1/hackers/reports', {
+        const response = await fetch('https://api.hackerone.com/v1/me', {
             method: 'GET',
             headers: {
                 'Authorization': `Basic ${auth}`,
