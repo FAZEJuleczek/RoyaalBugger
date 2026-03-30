@@ -5,20 +5,14 @@ export default async function handler(req, res) {
         return res.status(500).json({ error: "Brak zmiennej H1_TOKEN w Vercelu!" });
     }
 
-    try {
-        let finalToken = h1Auth.trim();
-        
-        // Jeśli token zawiera dwukropek, znaczy że to 'nick:klucz' i trzeba zakodować
-        if (finalToken.includes(':')) {
-            finalToken = Buffer.from(finalToken).toString('base64');
-        } else {
-            // Jeśli to już Base64, usuwamy tylko 'Basic ' jeśli tam jest
-            finalToken = finalToken.replace('Basic ', '');
-        }
+    // Czyścimy token tylko z ewentualnych spacji i słowa "Basic "
+    const finalToken = h1Auth.trim().replace('Basic ', '');
 
+    try {
         const response = await fetch('https://api.hackerone.com/v1/reports', {
             method: 'GET',
             headers: {
+                // Wysyłamy surowe Base64, które masz w Vercelu
                 'Authorization': `Basic ${finalToken}`,
                 'Accept': 'application/json'
             }
@@ -28,13 +22,13 @@ export default async function handler(req, res) {
 
         if (!response.ok) {
             return res.status(response.status).json({ 
-                error: "H1 odrzucił dostęp", 
+                error: "HackerOne nadal mówi NIE", 
                 h1_status: response.status,
-                debug_token_start: finalToken.substring(0, 5),
                 h1_response: data 
             });
         }
 
+        // Jeśli tu wejdzie, to znaczy że KLUCZ JEST DOBRY
         return res.status(200).json(data);
     } catch (error) {
         return res.status(500).json({ error: "Server Crash: " + error.message });
