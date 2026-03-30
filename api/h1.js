@@ -5,12 +5,15 @@ export default async function handler(req, res) {
         return res.status(500).json({ error: "Brak tokena w Vercelu!" });
     }
 
+    // Czyścimy wszystko - usuwamy "Basic " jeśli tam jest i białe znaki
+    const cleanToken = h1Auth.replace('Basic ', '').trim();
+
     try {
         const response = await fetch('https://api.hackerone.com/v1/reports', {
             method: 'GET',
             headers: {
-                // Używamy Basic, bo Twój ciąg to nick:klucz w Base64
-                'Authorization': `Basic ${h1Auth.trim()}`,
+                // To musi być DOKŁADNIE tak: Słowo Basic, spacja i Twój czysty Base64
+                'Authorization': `Basic ${cleanToken}`,
                 'Accept': 'application/json'
             }
         });
@@ -18,11 +21,16 @@ export default async function handler(req, res) {
         const data = await response.json();
 
         if (!response.ok) {
-            return res.status(response.status).json({ error: "H1 odrzucił klucz", data });
+            // Jeśli tu dostaniesz 401, to znaczy, że TOKEN WYGASŁ na HackerOne
+            return res.status(response.status).json({ 
+                error: "HackerOne odrzucił poświadczenia",
+                status: response.status,
+                received_token_start: cleanToken.substring(0, 10) + "..." 
+            });
         }
 
         return res.status(200).json(data);
     } catch (error) {
-        return res.status(500).json({ error: error.message });
+        return res.status(500).json({ error: "Błąd krytyczny: " + error.message });
     }
 }
