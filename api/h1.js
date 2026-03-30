@@ -13,7 +13,7 @@ export default async function handler(req, res) {
         const base64Auth = Buffer.from(h1Auth.trim()).toString('base64');
 
         // Używamy wbudowanego fetch (Node 20+)
-        const response = await fetch('https://api.hackerone.com/v1/reports', {
+        const response = await fetch('https://api.hackerone.com/v1/me', {
             method: 'GET',
             headers: {
                 'Authorization': `Basic ${base64Auth}`,
