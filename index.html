@@ -2,133 +2,123 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RoyaalBugger | Intelligence C2</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Royaal | Private C2</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --neon: #00f2ff; --bg: #050505; --card: rgba(255, 255, 255, 0.05); --gold: #ffae00; --yt: #ff0000; }
-        body { background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; margin: 0; padding: 10px; display: flex; justify-content: center; min-height: 100vh; box-sizing: border-box; overflow-x: hidden; }
-        #sidebar { position: fixed; top: 0; left: -280px; width: 260px; height: 100%; background: rgba(0, 0, 0, 0.95); backdrop-filter: blur(20px); border-right: 1px solid var(--neon); transition: 0.3s; z-index: 9999; padding-top: 80px; }
-        #sidebar.open { left: 0; }
-        .nav-item { padding: 15px 25px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); text-transform: uppercase; font-size: 11px; letter-spacing: 2px; opacity: 0.6; }
-        .nav-item:hover { opacity: 1; color: var(--neon); background: rgba(0,242,255,0.05); }
-        #menu-trigger { position: fixed; top: 25px; left: 25px; z-index: 10000; background: var(--card); border: 1px solid var(--neon); color: var(--neon); padding: 10px; border-radius: 10px; cursor: pointer; }
-        .container { width: 100%; max-width: 1000px; background: var(--card); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 30px; margin-top: 20px; }
-        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; margin-bottom: 30px; padding-left: 50px; }
-        .logo { font-size: 20px; font-weight: 800; color: var(--neon); text-transform: uppercase; letter-spacing: 2px; }
-        .view { display: none; }
-        .active-view { display: block; animation: fadeIn 0.5s; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .card { background: rgba(255,255,255,0.02); border-radius: 16px; padding: 20px; border: 1px solid rgba(255,255,255,0.05); min-height: 250px; }
-        .section-title { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; opacity: 0.5; margin-bottom: 15px; }
-        .bug-item { background: rgba(255, 174, 0, 0.05); border-left: 3px solid var(--gold); padding: 12px; margin: 10px 0; border-radius: 6px; font-size: 13px; }
-        .feed-item { background: rgba(0, 242, 255, 0.05); border-left: 3px solid var(--neon); padding: 12px; margin: 10px 0; border-radius: 6px; font-size: 13px; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } .header { padding-left: 0; } }
+        :root { --neon: #00f2ff; --bg: #050505; --card: rgba(255, 255, 255, 0.03); --gold: #ffae00; }
+        body { background: var(--bg); color: #fff; font-family: 'Consolas', monospace; margin: 0; padding: 10px; display: flex; justify-content: center; min-height: 100vh; }
+        .container { width: 100%; max-width: 1000px; border: 1px solid var(--neon); border-radius: 15px; padding: 20px; background: var(--card); box-shadow: 0 0 30px rgba(0, 242, 255, 0.1); margin: auto; }
+        .header { border-bottom: 2px solid var(--neon); padding-bottom: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .card { background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; min-height: 400px; }
+        .label { font-size: 10px; color: var(--neon); letter-spacing: 2px; margin-bottom: 15px; display: block; }
+        
+        /* Styl Twoich logów */
+        .item { padding: 10px; margin-bottom: 10px; border-radius: 4px; font-size: 12px; line-height: 1.4; animation: fadeIn 0.3s ease; }
+        .supa-item { border-left: 3px solid var(--gold); background: rgba(255, 174, 0, 0.05); }
+        .h1-item { border-left: 3px solid #fff; background: rgba(255, 255, 255, 0.05); }
+        
+        .status-badge { font-size: 9px; padding: 2px 5px; border-radius: 3px; background: #222; margin-right: 5px; text-transform: uppercase; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 
-    <button id="menu-trigger" onclick="toggleSidebar()">☰</button>
-
-    <nav id="sidebar">
-        <div class="nav-item" onclick="showView('main')">🏠 Intelligence Hub</div>
-        <div class="nav-item" onclick="showView('yt')" style="color: var(--yt);">🔴 YT MODE</div>
-        <div class="nav-item" onclick="window.location.href='admin.html'">⌨️ Terminal C2</div>
-    </nav>
-
-    <div class="container">
-        <div class="header">
-            <div class="logo" id="main-logo">ROYAAL_INTELLIGENCE</div>
-            <div style="font-size: 10px; opacity: 0.5;">STATUS: ONLINE</div>
-        </div>
-
-        <div id="view-main" class="view active-view">
-            <div class="grid">
-                <div class="card">
-                    <div class="section-title">● PRIVATE LOGS</div>
-                    <div id="logs-container">Wczytywanie...</div>
-                </div>
-                <div class="card">
-                    <div class="section-title">● GLOBAL BUG FEED</div>
-                    <div id="rss-feed">Inicjowanie...</div>
-                </div>
-            </div>
-        </div>
-
-        <div id="view-yt" class="view">
-            <div class="grid">
-                <div class="card" style="border-color: var(--yt);">
-                    <div class="section-title">● YT SUBS</div>
-                    <span style="font-size: 32px; font-weight: 800; color: var(--yt);">1,240</span>
-                </div>
-                <div class="card">
-                    <div class="section-title">● DATA COUNT</div>
-                    <div id="yt-stats" style="font-size: 24px; font-weight: 800;">0</div>
-                </div>
-            </div>
-        </div>
+<div class="container">
+    <div class="header">
+        <div style="color: var(--neon); font-weight: bold; letter-spacing: 3px;">JULIUSZ_PRIVATE_C2</div>
+        <div style="font-size: 10px; opacity: 0.6;">SYSTEM_TIME: <span id="clock">00:00:00</span></div>
     </div>
 
-    <script>
-        // Funkcje globalne zdefiniowane na samym początku, żeby uniknąć ReferenceError
-        window.toggleSidebar = function() {
-            document.getElementById('sidebar').classList.toggle('open');
-        };
+    <div class="grid">
+        <div class="card">
+            <span class="label">● MY_SUPABASE_STREAM</span>
+            <div id="supa-stream">Inicjowanie strumienia...</div>
+        </div>
 
-        window.showView = function(viewId) {
-            console.log("Zmieniam widok na:", viewId);
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active-view'));
-            const targetView = document.getElementById('view-' + viewId);
-            if (targetView) targetView.classList.add('active-view');
-            
-            const logo = document.getElementById('main-logo');
-            if(viewId === 'yt') {
-                logo.style.color = 'var(--yt)';
-                logo.innerText = 'ROYAAL_CREATOR';
-            } else {
-                logo.style.color = 'var(--neon)';
-                logo.innerText = 'ROYAAL_INTELLIGENCE';
+        <div class="card">
+            <span class="label">● MY_H1_REPORTS</span>
+            <div id="h1-stream">Czekam na autoryzację H1...</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- KONFIGURACJA ---
+    const CONFIG = {
+        supaUrl: 'https://fvxodipuudkhzykpleul.supabase.co',
+        supaKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2eG9kaXB1dWRraHp5a3BsZXVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MDkyNjIsImV4cCI6MjA5MDM4NTI2Mn0.uBTUlc0-aoOzWsroJ1dvhV4JFbjJXnJ8EZjuMAAiQMQ',
+        h1User: 'royaal',       // <--- WPISZ TU SWÓJ NICK H1
+        h1Id: 'royaal',        // <--- WPISZ TU IDENTIFIER Z TABELKI
+        h1Secret: 'L4EWVHOXLwKb0ghmOLCezJi1+ymx4/E+e7zlPfMp31I=' // Twój Secret z obrazka
+    };
+
+    const _supa = supabase.createClient(CONFIG.supaUrl, CONFIG.supaKey);
+
+    // 1. POBIERANIE LOGÓW Z SUPABASE (Twoje "hi" itp.)
+    async function loadSupa() {
+        const out = document.getElementById('supa-stream');
+        try {
+            const { data, error } = await _supa.from('logs').select('*');
+            if (error) throw error;
+            if (data) {
+                out.innerHTML = data.reverse().map(l => `
+                    <div class="item supa-item">
+                        <b style="color:var(--gold)">${l.title || 'LOG'}</b><br>
+                        ${l.content || '...'}
+                    </div>
+                `).join('');
             }
-            document.getElementById('sidebar').classList.remove('open');
-        };
+        } catch (e) { out.innerHTML = "Błąd Supabase: " + e.message; }
+    }
 
-        const SB_URL = 'https://fvxodipuudkhzykpleul.supabase.co';
-        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2eG9kaXB1dWRraHp5a3BsZXVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MDkyNjIsImV4cCI6MjA5MDM4NTI2Mn0.uBTUlc0-aoOzWsroJ1dvhV4JFbjJXnJ8EZjuMAAiQMQ';
-        const _supabase = supabase.createClient(SB_URL, SB_KEY);
+    // 2. POBIERANIE TWOICH PRYWATNYCH RAPORTÓW Z H1
+    async function loadH1() {
+        const out = document.getElementById('h1-stream');
+        const auth = btoa(`${CONFIG.h1Id}:${CONFIG.h1Secret}`);
+        
+        try {
+            // Używamy darmowego mostu (proxy), bo H1 blokuje zapytania z przeglądarki
+            const proxy = 'https://cors-anywhere.herokuapp.com/';
+            const api = `https://api.hackerone.com/v1/reports?filter[reporter][]=${CONFIG.h1User}`;
 
-        async function loadData() {
-            const container = document.getElementById('logs-container');
-            try {
-                const { data, error } = await _supabase.from('logs').select('*');
-                if (error) throw error;
-                if (data) {
-                    container.innerHTML = data.reverse().slice(0, 5).map(l => `
-                        <div class="bug-item"><b>${l.title || 'LOG'}</b>: ${l.content || '...'}</div>
-                    `).join('');
-                    document.getElementById('yt-stats').innerText = data.length;
-                }
-            } catch (e) {
-                container.innerHTML = "Błąd bazy.";
-                console.error(e);
+            const response = await fetch(proxy + api, {
+                headers: { 'Authorization': `Basic ${auth}`, 'Accept': 'application/json' }
+            });
+
+            if (response.status === 403) {
+                out.innerHTML = `<div style="font-size:11px; color:#ff4444;">KLIKNIJ TUTAJ I WŁĄCZ PROXY:<br><a href="https://cors-anywhere.herokuapp.com/corsdemo" target="_blank" style="color:#fff">cors-anywhere.herokuapp.com/corsdemo</a><br>Potem odśwież stronę.</div>`;
+                return;
             }
-        }
 
-        async function loadRSS() {
-            try {
-                const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent("https://hackerone.com/hacktivity.rss")}`);
-                const d = await res.json();
-                if(d.items) {
-                    document.getElementById('rss-feed').innerHTML = d.items.slice(0, 5).map(i => `
-                        <div class="feed-item"><b>${i.author}</b>: ${i.title.substring(0, 40)}...</div>
-                    `).join('');
-                }
-            } catch (e) { document.getElementById('rss-feed').innerText = "RSS Offline."; }
-        }
+            const res = await response.json();
+            if (res.data) {
+                out.innerHTML = res.data.map(r => `
+                    <div class="item h1-item">
+                        <span class="status-badge">${r.attributes.state}</span>
+                        <b>#${r.id}</b><br>
+                        ${r.attributes.title}
+                    </div>
+                `).join('');
+            }
+        } catch (e) { out.innerHTML = "Problem z API H1."; }
+    }
 
-        // Start
-        loadData();
-        loadRSS();
-    </script>
+    // --- LOGIKA STARTOWA ---
+    loadSupa();
+    loadH1();
+
+    // Live update dla Twoich logów (Supabase)
+    _supa.channel('any').on('postgres_changes', { event: '*', schema: 'public', table: 'logs' }, () => loadSupa()).subscribe();
+
+    // Zegar
+    setInterval(() => {
+        document.getElementById('clock').innerText = new Date().toLocaleTimeString();
+    }, 1000);
+</script>
+
 </body>
 </html>
