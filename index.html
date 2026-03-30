@@ -75,15 +75,26 @@
     }
 
     // 2. ŁADOWANIE SUPABASE (Jeśli masz tam publiczne logi)
-    async function loadSupa() {
-        const out = document.getElementById('supa-stream');
-        try {
-            // Tutaj możesz albo zrobić drugie API w folderze /api, 
-            // albo użyć klucza publicznego, jeśli baza nie jest tajna.
-            // Na razie zostawiamy miejsce na Twoje logi.
-            out.innerHTML = "Ładowanie logów z bazy...";
-        } catch (e) { out.innerHTML = "Błąd bazy."; }
+   async function loadSupa() {
+    const out = document.getElementById('supa-stream');
+    try {
+        // Pytamy Twoje nowe API, które stworzyłeś w api/supa.js
+        const response = await fetch('/api/supa');
+        const data = await response.json();
+
+        if (Array.isArray(data) && data.length > 0) {
+            out.innerHTML = data.reverse().map(l => `
+                <div class="item supa-item" style="border-bottom: 1px solid #1a3a3a; padding: 5px 0;">
+                    <b style="color:var(--gold)">${l.title || 'LOG'}</b>: ${l.content || '...'}
+                </div>`).join('');
+        } else {
+            out.innerHTML = "Baza jest pusta (Cisza przed burzą...).";
+        }
+    } catch (e) {
+        out.innerHTML = "Błąd połączenia z bazą przez API.";
+        console.error(e);
     }
+}
 
     // START
     window.onload = () => {
