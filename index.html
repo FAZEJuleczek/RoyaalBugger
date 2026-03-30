@@ -47,54 +47,64 @@
 </div>
 
 <script>
-    // Konfiguracja (bez kluczy!)
-    const CONFIG = {
-        supaUrl: 'https://fvxodipuudkhzykpleul.supabase.co'
-    };
-
     // 1. ŁADOWANIE LOGÓW Z HACKERONE PRZEZ TWÓJ SERWER (API)
     async function loadH1() {
         const out = document.getElementById('h1-stream');
         try {
-            // Pytamy Twój plik api/h1.js, który ma dostęp do kluczy na Vercelu
+            out.innerHTML = '<span style="opacity:0.5">Łączenie z Agentem H1...</span>';
+            
             const response = await fetch('/api/h1');
             const res = await response.json();
 
-            if (res.data && res.data.length > 0) {
+            // Jeśli serwer (backend) zwrócił błąd
+            if (res.error) {
+                out.innerHTML = `<div class="item" style="border-left:3px solid red; background:rgba(255,0,0,0.1)">
+                    <b style="color:#ff4444">BŁĄD AGENTA:</b><br>${res.error}
+                    ${res.status ? `<br><small>Kod: ${res.status}</small>` : ''}
+                </div>`;
+                return;
+            }
+
+            // Jeśli dostaliśmy dane (format z /v1/hackers/reports)
+            if (res.data && Array.isArray(res.data) && res.data.length > 0) {
                 out.innerHTML = res.data.map(r => `
                     <div class="item h1-item">
-                        <b style="color:var(--gold)">#${r.id}</b> [${r.attributes.state}]<br>
-                        ${r.attributes.title}
+                        <span class="status-badge">${r.attributes.state}</span>
+                        <b style="color:var(--gold)">#${r.id}</b><br>
+                        <span style="opacity:0.9">${r.attributes.title}</span>
                     </div>`).join('');
-            } else {
-                out.innerHTML = "Brak raportów lub błąd autoryzacji.";
+            } 
+            // Jeśli autoryzacja przeszła, ale nie masz raportów
+            else {
+                out.innerHTML = "<div class='item'>Połączono z H1: Brak raportów (Czyste konto).</div>";
             }
         } catch (e) {
-            out.innerHTML = "Agent H1 nie odpowiada (Sprawdź Vercel Logs).";
+            console.error(e);
+            out.innerHTML = "<div class='item' style='color:red'>Agent H1 nie odpowiada (Błąd połączenia).</div>";
         }
     }
 
-    // 2. ŁADOWANIE SUPABASE (Jeśli masz tam publiczne logi)
-   async function loadSupa() {
-    const out = document.getElementById('supa-stream');
-    try {
-        // Pytamy Twoje nowe API, które stworzyłeś w api/supa.js
-        const response = await fetch('/api/supa');
-        const data = await response.json();
+    // 2. ŁADOWANIE SUPABASE
+    async function loadSupa() {
+        const out = document.getElementById('supa-stream');
+        try {
+            const response = await fetch('/api/supa');
+            const data = await response.json();
 
-        if (Array.isArray(data) && data.length > 0) {
-            out.innerHTML = data.reverse().map(l => `
-                <div class="item supa-item" style="border-bottom: 1px solid #1a3a3a; padding: 5px 0;">
-                    <b style="color:var(--gold)">${l.title || 'LOG'}</b>: ${l.content || '...'}
-                </div>`).join('');
-        } else {
-            out.innerHTML = "Baza jest pusta (Cisza przed burzą...).";
+            if (Array.isArray(data) && data.length > 0) {
+                out.innerHTML = data.reverse().map(l => `
+                    <div class="item supa-item">
+                        <b style="color:var(--gold)">${l.title || 'LOG'}</b><br>
+                        <span style="opacity:0.8">${l.content || '...'}</span>
+                    </div>`).join('');
+            } else {
+                out.innerHTML = "Baza jest pusta (Cisza przed burzą...).";
+            }
+        } catch (e) {
+            out.innerHTML = "<div class='item' style='color:red'>Błąd bazy danych.</div>";
+            console.error(e);
         }
-    } catch (e) {
-        out.innerHTML = "Błąd połączenia z bazą przez API.";
-        console.error(e);
     }
-}
 
     // START
     window.onload = () => {
