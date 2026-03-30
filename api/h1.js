@@ -1,14 +1,26 @@
 export default async function handler(req, res) {
-    const h1Auth = process.env.H1_TOKEN;
+    const allKeys = Object.keys(process.env);
+    const tokenValue = process.env.H1_TOKEN;
 
-    if (!h1Auth || !h1Auth.includes(':')) {
-        return res.status(500).json({ error: "Ustaw w Vercel H1_TOKEN na: royaal:TWÓJ_TOKEN" });
+    // Jeśli token nie istnieje, wypiszemy wszystkie dostępne nazwy zmiennych
+    if (!tokenValue) {
+        return res.status(500).json({ 
+            error: "Vercel nadal nie widzi H1_TOKEN", 
+            widoczne_zmienne: allKeys.filter(k => !k.includes('AUTH') && !k.includes('KEY')) // filtr bezpieczeństwa
+        });
     }
 
-    try {
-        const base64Auth = Buffer.from(h1Auth.trim()).toString('base64');
+    // Jeśli istnieje, sprawdzamy czy ma dwukropek
+    if (!tokenValue.includes(':')) {
+        return res.status(500).json({ 
+            error: "Zmienna istnieje, ale brakuje w niej dwukropka!",
+            poczatek_zmiennej: tokenValue.substring(0, 5) + "..."
+        });
+    }
 
-        // fetch jest wbudowany w Node 20, nie potrzebuje instalacji
+    // Jeśli wszystko ok, spróbujmy się połączyć
+    try {
+        const base64Auth = Buffer.from(tokenValue.trim()).toString('base64');
         const response = await fetch('https://api.hackerone.com/v1/me', {
             method: 'GET',
             headers: {
@@ -16,7 +28,6 @@ export default async function handler(req, res) {
                 'Accept': 'application/json'
             }
         });
-
         const data = await response.json();
         return res.status(response.status).json(data);
     } catch (e) {
