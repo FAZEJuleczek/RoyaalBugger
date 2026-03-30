@@ -2,7 +2,7 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Royaal | Private C2</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -11,15 +11,15 @@
         .container { width: 100%; max-width: 1000px; border: 1px solid var(--neon); border-radius: 15px; padding: 20px; background: var(--card); box-shadow: 0 0 30px rgba(0, 242, 255, 0.1); margin: auto; }
         .header { border-bottom: 2px solid var(--neon); padding-bottom: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .card { background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; min-height: 400px; }
+        .card { background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; min-height: 400px; overflow-y: auto; }
         .label { font-size: 10px; color: var(--neon); letter-spacing: 2px; margin-bottom: 15px; display: block; }
         
-        /* Styl Twoich logów */
         .item { padding: 10px; margin-bottom: 10px; border-radius: 4px; font-size: 12px; line-height: 1.4; animation: fadeIn 0.3s ease; }
         .supa-item { border-left: 3px solid var(--gold); background: rgba(255, 174, 0, 0.05); }
         .h1-item { border-left: 3px solid #fff; background: rgba(255, 255, 255, 0.05); }
         
-        .status-badge { font-size: 9px; padding: 2px 5px; border-radius: 3px; background: #222; margin-right: 5px; text-transform: uppercase; }
+        .status-badge { font-size: 9px; padding: 2px 5px; border-radius: 3px; background: #222; margin-right: 5px; text-transform: uppercase; color: var(--neon); }
+        .err-link { color: #fff; text-decoration: underline; font-weight: bold; }
         
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
@@ -30,13 +30,13 @@
 <div class="container">
     <div class="header">
         <div style="color: var(--neon); font-weight: bold; letter-spacing: 3px;">JULIUSZ_PRIVATE_C2</div>
-        <div style="font-size: 10px; opacity: 0.6;">SYSTEM_TIME: <span id="clock">00:00:00</span></div>
+        <div id="clock" style="font-size: 10px; opacity: 0.6;">00:00:00</div>
     </div>
 
     <div class="grid">
         <div class="card">
             <span class="label">● MY_SUPABASE_STREAM</span>
-            <div id="supa-stream">Inicjowanie strumienia...</div>
+            <div id="supa-stream">Inicjowanie...</div>
         </div>
 
         <div class="card">
@@ -47,74 +47,80 @@
 </div>
 
 <script>
-    // --- KONFIGURACJA ---
+    // --- KONFIGURACJA (Uzupełnij te dane!) ---
     const CONFIG = {
         supaUrl: 'https://fvxodipuudkhzykpleul.supabase.co',
         supaKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2eG9kaXB1dWRraHp5a3BsZXVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MDkyNjIsImV4cCI6MjA5MDM4NTI2Mn0.uBTUlc0-aoOzWsroJ1dvhV4JFbjJXnJ8EZjuMAAiQMQ',
-        h1User: 'royaal',       // <--- WPISZ TU SWÓJ NICK H1
-        h1Id: 'royaal',        // <--- WPISZ TU IDENTIFIER Z TABELKI
-        h1Secret: 'L4EWVHOXLwKb0ghmOLCezJi1+ymx4/E+e7zlPfMp31I=' // Twój Secret z obrazka
+        h1User: 'royaal',       // <--- Wpisz nick
+        h1Id: 'royaal',     // <--- Wpisz Identifier z tabelki
+        h1Secret: 'L4EWVHOXLwKb0ghmOLCezJi1+ymx4/E+e7zlPfMp31I=' // Secret z Twojego zdjęcia
     };
 
     const _supa = supabase.createClient(CONFIG.supaUrl, CONFIG.supaKey);
 
-    // 1. POBIERANIE LOGÓW Z SUPABASE (Twoje "hi" itp.)
+    // 1. FUNKCJA SUPABASE
     async function loadSupa() {
         const out = document.getElementById('supa-stream');
         try {
             const { data, error } = await _supa.from('logs').select('*');
             if (error) throw error;
-            if (data) {
-                out.innerHTML = data.reverse().map(l => `
-                    <div class="item supa-item">
-                        <b style="color:var(--gold)">${l.title || 'LOG'}</b><br>
-                        ${l.content || '...'}
-                    </div>
-                `).join('');
-            }
-        } catch (e) { out.innerHTML = "Błąd Supabase: " + e.message; }
+            out.innerHTML = data && data.length > 0 
+                ? data.reverse().map(l => `<div class="item supa-item"><b style="color:var(--gold)">${l.title || 'LOG'}</b><br>${l.content || '...'}</div>`).join('')
+                : "Baza jest pusta.";
+        } catch (e) { out.innerHTML = "Błąd bazy."; }
     }
 
-    // 2. POBIERANIE TWOICH PRYWATNYCH RAPORTÓW Z H1
+    // 2. FUNKCJA HACKERONE (POPRAWIONA DIAGNOSTYCZNA)
     async function loadH1() {
         const out = document.getElementById('h1-stream');
         const auth = btoa(`${CONFIG.h1Id}:${CONFIG.h1Secret}`);
         
         try {
-            // Używamy darmowego mostu (proxy), bo H1 blokuje zapytania z przeglądarki
             const proxy = 'https://cors-anywhere.herokuapp.com/';
             const api = `https://api.hackerone.com/v1/reports?filter[reporter][]=${CONFIG.h1User}`;
 
             const response = await fetch(proxy + api, {
-                headers: { 'Authorization': `Basic ${auth}`, 'Accept': 'application/json' }
+                headers: { 
+                    'Authorization': `Basic ${auth}`, 
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
             });
 
             if (response.status === 403) {
-                out.innerHTML = `<div style="font-size:11px; color:#ff4444;">KLIKNIJ TUTAJ I WŁĄCZ PROXY:<br><a href="https://cors-anywhere.herokuapp.com/corsdemo" target="_blank" style="color:#fff">cors-anywhere.herokuapp.com/corsdemo</a><br>Potem odśwież stronę.</div>`;
+                out.innerHTML = `<div style="font-size:11px; color:#ff4444;">BŁĄD 403: PROXY ZABLOKOWANE.<br>Kliknij tutaj na telefonie:<br><a href="https://cors-anywhere.herokuapp.com/corsdemo" class="err-link" target="_blank">ODBLOKUJ DOSTĘP</a><br>Potem odśwież tę stronę.</div>`;
+                return;
+            }
+
+            if (response.status === 401) {
+                out.innerHTML = "<span style='color:red'>BŁĄD 401: Zły ID lub Secret H1. Sprawdź Identifier w tabelce!</span>";
                 return;
             }
 
             const res = await response.json();
-            if (res.data) {
+            if (res.data && res.data.length > 0) {
                 out.innerHTML = res.data.map(r => `
                     <div class="item h1-item">
                         <span class="status-badge">${r.attributes.state}</span>
-                        <b>#${r.id}</b><br>
-                        ${r.attributes.title}
+                        <b>#${r.id}</b><br>${r.attributes.title}
                     </div>
                 `).join('');
+            } else {
+                out.innerHTML = "Brak Twoich raportów (lub błędny nick).";
             }
-        } catch (e) { out.innerHTML = "Problem z API H1."; }
+        } catch (e) { 
+            out.innerHTML = "Błąd połączenia. Sprawdź, czy masz internet i aktywne proxy."; 
+        }
     }
 
-    // --- LOGIKA STARTOWA ---
+    // START
     loadSupa();
     loadH1();
 
-    // Live update dla Twoich logów (Supabase)
+    // LIVE UPDATE
     _supa.channel('any').on('postgres_changes', { event: '*', schema: 'public', table: 'logs' }, () => loadSupa()).subscribe();
 
-    // Zegar
+    // CLOCK
     setInterval(() => {
         document.getElementById('clock').innerText = new Date().toLocaleTimeString();
     }, 1000);
