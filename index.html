@@ -47,84 +47,84 @@
 </div>
 
 <script>
-    // --- KONFIGURACJA (Uzupełnij te dane!) ---
+    // --- KONFIGURACJA (Twoje centrum dowodzenia) ---
     const CONFIG = {
         supaUrl: 'https://fvxodipuudkhzykpleul.supabase.co',
         supaKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2eG9kaXB1dWRraHp5a3BsZXVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MDkyNjIsImV4cCI6MjA5MDM4NTI2Mn0.uBTUlc0-aoOzWsroJ1dvhV4JFbjJXnJ8EZjuMAAiQMQ',
-        h1User: 'royaal',       // <--- Wpisz nick
-        h1Id: '',     // <--- Wpisz Identifier z tabelki
-        h1Secret: 'iWLJlbaya+7gyd2mRoMXYkb5vxRmr2yvGBEUMEq2xLY=' // Secret z Twojego zdjęcia
+        h1User: 'royaal',
+        // GOTOWY BASE64 (royaal:Identifier:Secret)
+        h1AuthBase64: 'cm95YWFsOmlXTEpsYmF5YSs3Z3lkMm1Sb01YWWtiNXZ4Um1yMnl2R0JFVU1FcTJ4TFk9' // <--- Tu wklej ten PEŁNY ciąg, który pokazywałeś
     };
 
     const _supa = supabase.createClient(CONFIG.supaUrl, CONFIG.supaKey);
+    const proxy = 'https://cors-anywhere.herokuapp.com/';
 
-    // 1. FUNKCJA SUPABASE
+    // 1. SUPABASE - LOGI LIVE
     async function loadSupa() {
         const out = document.getElementById('supa-stream');
         try {
             const { data, error } = await _supa.from('logs').select('*');
             if (error) throw error;
             out.innerHTML = data && data.length > 0 
-                ? data.reverse().map(l => `<div class="item supa-item"><b style="color:var(--gold)">${l.title || 'LOG'}</b><br>${l.content || '...'}</div>`).join('')
-                : "Baza jest pusta.";
-        } catch (e) { out.innerHTML = "Błąd bazy."; }
+                ? data.reverse().map(l => `
+                    <div class="item supa-item" style="border-bottom:1px solid #333; padding:5px 0;">
+                        <b style="color:var(--gold)">${l.title || 'LOG'}</b>: ${l.content || '...'}
+                    </div>`).join('')
+                : "Cisza w eterze...";
+        } catch (e) { out.innerHTML = "Baza padła."; }
     }
 
-    // 2. FUNKCJA HACKERONE (POPRAWIONA DIAGNOSTYCZNA)
+    // 2. HACKERONE - RAPORTY + WIADOMOŚCI
     async function loadH1() {
         const out = document.getElementById('h1-stream');
-        const auth = btoa(`${CONFIG.h1Id}:${CONFIG.h1Secret}`);
         
         try {
-            const proxy = 'https://cors-anywhere.herokuapp.com/';
             const api = `https://api.hackerone.com/v1/reports?filter[reporter][]=${CONFIG.h1User}`;
-
             const response = await fetch(proxy + api, {
                 headers: { 
-                    'Authorization': `Basic ${auth}`, 
+                    'Authorization': `Basic ${CONFIG.h1AuthBase64}`, 
                     'Accept': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest'
                 }
             });
 
             if (response.status === 403) {
-                out.innerHTML = `<div style="font-size:11px; color:#ff4444;">BŁĄD 403: PROXY ZABLOKOWANE.<br>Kliknij tutaj na telefonie:<br><a href="https://cors-anywhere.herokuapp.com/corsdemo" class="err-link" target="_blank">ODBLOKUJ DOSTĘP</a><br>Potem odśwież tę stronę.</div>`;
-                return;
-            }
-
-            if (response.status === 401) {
-                out.innerHTML = "<span style='color:red'>BŁĄD 401: Zły ID lub Secret H1. Sprawdź Identifier w tabelce!</span>";
+                out.innerHTML = `<a href="${proxy}corsdemo" target="_blank" style="color:red; font-size:10px;">ODBLOKUJ PROXY</a>`;
                 return;
             }
 
             const res = await response.json();
-            if (res.data && res.data.length > 0) {
-                out.innerHTML = res.data.map(r => `
-                    <div class="item h1-item">
-                        <span class="status-badge">${r.attributes.state}</span>
-                        <b>#${r.id}</b><br>${r.attributes.title}
-                    </div>
-                `).join('');
-            } else {
-                out.innerHTML = "Brak Twoich raportów (lub błędny nick).";
+            if (res.data) {
+                out.innerHTML = "";
+                for (const r of res.data) {
+                    // Pobieramy detale/wiadomości dla każdego raportu
+                    const actRes = await fetch(proxy + `https://api.hackerone.com/v1/reports/${r.id}/activities`, {
+                        headers: { 'Authorization': `Basic ${CONFIG.h1AuthBase64}`, 'Accept': 'application/json' }
+                    });
+                    const acts = await actRes.json();
+                    const lastMsg = acts.data?.[0]?.attributes?.message || "Brak nowych wiadomości.";
+
+                    out.innerHTML += `
+                        <div class="item h1-item">
+                            <span style="color:var(--gold)">[${r.attributes.state}]</span> <b>#${r.id}</b>: ${r.attributes.title}
+                            <div style="font-size:10px; color:#888; padding-left:10px;">💬 ${lastMsg.substring(0, 50)}...</div>
+                        </div>`;
+                }
             }
-        } catch (e) { 
-            out.innerHTML = "Błąd połączenia. Sprawdź, czy masz internet i aktywne proxy."; 
-        }
+        } catch (e) { out.innerHTML = "H1 Error."; }
     }
 
-    // START
+    // INICJALIZACJA
     loadSupa();
     loadH1();
 
-    // LIVE UPDATE
-    _supa.channel('any').on('postgres_changes', { event: '*', schema: 'public', table: 'logs' }, () => loadSupa()).subscribe();
-
-    // CLOCK
+    // REALTIME I ZEGAR
+    _supa.channel('any').on('postgres_changes', { event: '*', schema: 'public', table: 'logs' }, loadSupa).subscribe();
     setInterval(() => {
-        document.getElementById('clock').innerText = new Date().toLocaleTimeString();
+        const c = document.getElementById('clock');
+        if(c) c.innerText = new Date().toLocaleTimeString();
     }, 1000);
 </script>
-
+    
 </body>
 </html>
