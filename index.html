@@ -15,10 +15,10 @@
         }
         body { background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; margin: 0; padding: 10px; display: flex; justify-content: center; min-height: 100vh; box-sizing: border-box; overflow-x: hidden; }
         
-        /* --- SIDEBAR (Nowość) --- */
+        /* --- SIDEBAR --- */
         #sidebar {
             position: fixed; top: 0; left: -280px; width: 260px; height: 100%;
-            background: rgba(0, 0, 0, 0.9); backdrop-filter: blur(20px);
+            background: rgba(0, 0, 0, 0.95); backdrop-filter: blur(20px);
             border-right: 1px solid var(--neon); transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             z-index: 9999; padding-top: 80px;
         }
@@ -33,30 +33,29 @@
         #menu-trigger {
             position: fixed; top: 25px; left: 25px; z-index: 10000;
             background: var(--card); border: 1px solid var(--neon);
-            color: var(--neon); padding: 10px 12px; border-radius: 10px; cursor: pointer;
+            color: var(--neon); padding: 10px 12px; border-radius: 10px; cursor: pointer; transition: 0.3s;
         }
+        #menu-trigger:hover { box-shadow: 0 0 15px var(--neon); }
 
         .container { width: 100%; max-width: 1000px; background: var(--card); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 30px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); margin-top: 20px; transition: 0.5s; }
         .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; margin-bottom: 30px; padding-left: 50px; }
         .logo { font-size: 20px; font-weight: 800; color: var(--neon); text-transform: uppercase; letter-spacing: 2px; }
         
-        /* WIDOKI */
         .view { display: none; }
         .active-view { display: block; animation: fadeIn 0.5s; }
 
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
-        .card { background: rgba(255,255,255,0.02); border-radius: 16px; padding: 20px; border: 1px solid rgba(255,255,255,0.05); }
+        .card { background: rgba(255,255,255,0.02); border-radius: 16px; padding: 20px; border: 1px solid rgba(255,255,255,0.05); min-height: 200px; }
         .section-title { font-size: 12px; letter-spacing: 2px; text-transform: uppercase; opacity: 0.5; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
 
-        /* Statystyki YT MODE */
+        /* Statystyki YT */
         .stat-num { font-size: 32px; font-weight: 800; color: var(--gold); display: block; margin-top: 10px; }
-
-        .bug-item { background: rgba(255, 174, 0, 0.05); border-left: 3px solid var(--gold); padding: 12px; margin: 10px 0; border-radius: 6px; font-size: 13px; }
+        .bug-item { background: rgba(255, 174, 0, 0.05); border-left: 3px solid var(--gold); padding: 12px; margin: 10px 0; border-radius: 6px; font-size: 13px; font-family: monospace; }
         .feed-item { background: rgba(0, 242, 255, 0.05); border-left: 3px solid var(--neon); padding: 12px; margin: 10px 0; border-radius: 6px; font-size: 13px; }
-        .feed-item a { color: var(--neon); text-decoration: none; font-weight: bold; font-size: 11px; display: block; margin-top: 5px; text-transform: uppercase; }
+        .feed-item a { color: var(--neon); text-decoration: none; font-weight: bold; font-size: 10px; display: block; margin-top: 5px; }
 
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } .header { flex-direction: column; gap: 15px; padding-left: 0; text-align: center; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } .header { padding-left: 0; text-align: center; } }
     </style>
 </head>
 <body>
@@ -65,21 +64,21 @@
 
     <div id="sidebar">
         <div class="nav-item" onclick="showView('main')">🏠 Intelligence Hub</div>
-        <div class="nav-item" onclick="showView('yt')" style="color: var(--yt);">🔴 YouTube Mode</div>
-        <div class="nav-item" onclick="window.location.href='admin.html'">⌨️ Terminal</div>
+        <div class="nav-item" onclick="showView('yt')" style="color: var(--yt);">🔴 YT MODE (Stats)</div>
+        <div class="nav-item" onclick="window.location.href='admin.html'">⌨️ Terminal C2</div>
     </div>
 
     <div class="container">
         <div class="header">
             <div class="logo" id="main-logo">ROYAAL_INTELLIGENCE</div>
-            <div style="font-size: 10px; opacity: 0.5; letter-spacing: 1px;">STATUS: ACTIVE_DECRYPTOR</div>
+            <div style="font-size: 10px; opacity: 0.5; letter-spacing: 1px;">SYSTEM STATUS: ONLINE</div>
         </div>
 
         <div id="view-main" class="view active-view">
             <div class="grid">
                 <div class="card">
                     <div class="section-title"><span style="color:var(--gold)">●</span> PRIVATE LOGS</div>
-                    <div id="logs-container">Łączenie z bazą...</div>
+                    <div id="logs-container">Łączenie z bazą danych...</div>
                 </div>
 
                 <div class="card">
@@ -92,24 +91,25 @@
         <div id="view-yt" class="view">
             <div class="grid">
                 <div class="card" style="border-color: var(--yt);">
-                    <div class="section-title"><span style="color:var(--yt)">●</span> YT SUBS</div>
+                    <div class="section-title"><span style="color:var(--yt)">●</span> YT SUBSCRIBERS</div>
                     <span class="stat-num" style="color: var(--yt);">1,240</span>
                 </div>
                 <div class="card">
-                    <div class="section-title"><span style="color:var(--gold)">●</span> BOUNTY STATS</div>
+                    <div class="section-title"><span style="color:var(--gold)">●</span> BB BOUNTY PERFORMANCE</div>
                     <div id="yt-bounty-stats" style="font-size: 13px; margin-top: 10px;">
-                        Wczytywanie statystyk z bazy...
+                        Analizowanie raportów...
                     </div>
                 </div>
             </div>
             <div class="card" style="margin-top: 15px;">
-                <div class="section-title">LAST COMMUNITY COMMENT</div>
+                <div class="section-title">LATEST COMMUNITY FEEDBACK</div>
                 <p style="font-style: italic; opacity: 0.8; font-size: 13px;">"Dobra robota! Czekamy na film z Twoich ostatnich logów."</p>
             </div>
         </div>
     </div>
 
     <script>
+        // --- TWOJE DANE SUPABASE ---
         const SB_URL = 'https://fvxodipuudkhzykpleul.supabase.co';
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2eG9kaXB1dWRraHp5a3BsZXVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MDkyNjIsImV4cCI6MjA5MDM4NTI2Mn0.uBTUlc0-aoOzWsroJ1dvhV4JFbjJXnJ8EZjuMAAiQMQ';
         const _supabase = supabase.createClient(SB_URL, SB_KEY);
@@ -129,45 +129,73 @@
             }
         }
 
-        async function loadSupabaseLogs() {
-            const { data } = await _supabase.from('logs').select('*').order('created_at', { ascending: false });
-            if (data) {
-                // Główne logi
-                document.getElementById('logs-container').innerHTML = data.slice(0, 5).map(log => `
-                    <div class="bug-item"><b>${log.title}</b>: ${log.content}</div>
-                `).join('');
+        async function loadSupabaseData() {
+            const container = document.getElementById('logs-container');
+            const statsContainer = document.getElementById('yt-bounty-stats');
 
-                // Statystyki dla widoku YT
-                const acc = data.filter(l => l.content?.toLowerCase().includes('triaged')).length;
-                const total = data.length;
-                document.getElementById('yt-bounty-stats').innerHTML = `
-                    Przyjęte raporty: <b style="color:#00ff00">${acc}</b><br>
-                    Wszystkie wysłane: <b>${total}</b><br>
-                    Skuteczność: <b>${total > 0 ? Math.round((acc/total)*100) : 0}%</b>
-                `;
+            try {
+                const { data, error } = await _supabase.from('logs').select('*').order('created_at', { ascending: false });
+                
+                if (error) throw error;
+
+                if (data && data.length > 0) {
+                    // 1. Render logów
+                    container.innerHTML = data.slice(0, 5).map(log => `
+                        <div class="bug-item"><b>${log.title || 'LOG'}</b>: ${log.content || '...'}</div>
+                    `).join('');
+
+                    // 2. Statystyki dla widoku YT
+                    const acc = data.filter(l => l.content?.toLowerCase().includes('triaged') || l.content?.toLowerCase().includes('accepted')).length;
+                    const total = data.length;
+                    const pending = data.filter(l => l.content?.toLowerCase().includes('new') || l.content?.toLowerCase().includes('pending')).length;
+
+                    statsContainer.innerHTML = `
+                        PRZYJĘTE: <b style="color:#00ff00">${acc}</b><br>
+                        OCZEKUJĄCE: <b style="color:#ffcc00">${pending}</b><br>
+                        TOTAL REPORTS: <b>${total}</b>
+                    `;
+                } else {
+                    container.innerHTML = "Brak logów w bazie.";
+                }
+            } catch (err) {
+                console.error("Supabase Error:", err);
+                container.innerHTML = "Błąd połączenia z bazą.";
             }
         }
 
         async function loadGlobalFeeds() {
-            const api_url = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent("https://hackerone.com/hacktivity.rss")}`;
+            const feedContainer = document.getElementById('rss-feed');
+            const rssUrl = "https://hackerone.com/hacktivity.rss";
+            const proxyUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
+
             try {
-                const response = await fetch(api_url);
+                const response = await fetch(proxyUrl);
                 const data = await response.json();
                 if (data.items) {
-                    document.getElementById('rss-feed').innerHTML = data.items.slice(0, 5).map(item => `
+                    feedContainer.innerHTML = data.items.slice(0, 5).map(item => `
                         <div class="feed-item">
-                            <b>${item.author || 'HackerOne'}</b>: ${item.title.substring(0, 60)}...
-                            <a href="${item.link}" target="_blank">SZCZEGÓŁY →</a>
+                            <b>${item.author || 'H1'}</b>: ${item.title.substring(0, 60)}...
+                            <a href="${item.link}" target="_blank">SZCZEGÓŁY RAPORTU →</a>
                         </div>
                     `).join('');
+                } else {
+                    feedContainer.innerHTML = "Brak nowych raportów publicznych.";
                 }
-            } catch (e) { console.error("Feed error"); }
+            } catch (e) {
+                feedContainer.innerHTML = "Błąd pobierania HackerOne feed.";
+            }
         }
 
-        _supabase.channel('any').on('postgres_changes', { event: '*', schema: 'public', table: 'logs' }, () => loadSupabaseLogs()).subscribe();
-        
-        loadSupabaseLogs();
+        // Start funkcji
+        loadSupabaseData();
         loadGlobalFeeds();
+
+        // Real-time (Supabase)
+        _supabase.channel('logs_realtime').on('postgres_changes', { event: '*', schema: 'public', table: 'logs' }, () => {
+            loadSupabaseData();
+        }).subscribe();
+
+        // Odświeżanie feedu co minutę
         setInterval(loadGlobalFeeds, 60000);
     </script>
 </body>
