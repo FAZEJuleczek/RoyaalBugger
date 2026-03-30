@@ -1,26 +1,24 @@
 export default async function handler(req, res) {
-    // W Vercelu w H1_TOKEN zostaw sam ten długi klucz: zZ30Bpt...
-    const apiToken = process.env.H1_TOKEN; 
+    const h1Auth = process.env.H1_TOKEN;
 
-    if (!apiToken) return res.status(500).json({ error: "Brak tokena w Vercel!" });
+    if (!h1Auth || !h1Auth.includes(':')) {
+        return res.status(500).json({ error: "Ustaw w Vercel H1_TOKEN na: royaal:TWÓJ_TOKEN" });
+    }
 
     try {
+        const base64Auth = Buffer.from(h1Auth.trim()).toString('base64');
+
+        // fetch jest wbudowany w Node 20, nie potrzebuje instalacji
         const response = await fetch('https://api.hackerone.com/v1/me', {
             method: 'GET',
             headers: {
-                // Próbujemy autoryzacji tokenem bezpośrednim
-                'Authorization': `Token token="${apiToken.trim()}"`,
+                'Authorization': `Basic ${base64Auth}`,
                 'Accept': 'application/json'
             }
         });
 
         const data = await response.json();
-
-        return res.status(response.status).json({
-            status: response.status,
-            metoda: "Token Auth",
-            data: data
-        });
+        return res.status(response.status).json(data);
     } catch (e) {
         return res.status(500).json({ error: e.message });
     }
