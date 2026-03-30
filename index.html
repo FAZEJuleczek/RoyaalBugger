@@ -47,83 +47,57 @@
 </div>
 
 <script>
-    // --- KONFIGURACJA (Twoje centrum dowodzenia) ---
+    // --- TWOJE CENTRUM DOWODZENIA ---
     const CONFIG = {
-        supaUrl: 'https://fvxodipuudkhzykpleul.supabase.co',
-        supaKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2eG9kaXB1dWRraHp5a3BsZXVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MDkyNjIsImV4cCI6MjA5MDM4NTI2Mn0.uBTUlc0-aoOzWsroJ1dvhV4JFbjJXnJ8EZjuMAAiQMQ',
-        h1User: 'royaal',
-        // GOTOWY BASE64 (royaal:Identifier:Secret)
-        h1AuthBase64: 'cm95YWFsOmlXTEpsYmF5YSs3Z3lkMm1Sb01YWWtiNXZ4Um1yMnl2R0JFVU1FcTJ4TFk9' // <--- Tu wklej ten PEŁNY ciąg, który pokazywałeś
+        // Skoro lecisz w Env Vars na Vercelu, to tutaj wrzuć tylko odniesienia
+        // Jeśli to czysty JS, wklej je tu RAZ, a potem zrób repo PRIVATE.
+        h1Auth: 'Basic cm95YWFsOkw0RVdWSE9YTHdLYjBnaG1PTERDZWFKAL...', 
+        supaKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...', 
+        supaUrl: 'https://fvxodipuudkhzykpleul.supabase.co'
     };
 
     const _supa = supabase.createClient(CONFIG.supaUrl, CONFIG.supaKey);
     const proxy = 'https://cors-anywhere.herokuapp.com/';
 
-    // 1. SUPABASE - LOGI LIVE
-    async function loadSupa() {
-        const out = document.getElementById('supa-stream');
-        try {
-            const { data, error } = await _supa.from('logs').select('*');
-            if (error) throw error;
-            out.innerHTML = data && data.length > 0 
-                ? data.reverse().map(l => `
-                    <div class="item supa-item" style="border-bottom:1px solid #333; padding:5px 0;">
-                        <b style="color:var(--gold)">${l.title || 'LOG'}</b>: ${l.content || '...'}
-                    </div>`).join('')
-                : "Cisza w eterze...";
-        } catch (e) { out.innerHTML = "Baza padła."; }
-    }
+    async function loadEverything() {
+        const h1Out = document.getElementById('h1-stream');
+        const supaOut = document.getElementById('supa-stream');
 
-    // 2. HACKERONE - RAPORTY + WIADOMOŚCI
-    async function loadH1() {
-        const out = document.getElementById('h1-stream');
-        
+        // 1. POBIERANIE Z HACKERONE (TYLKO TOKEN)
         try {
-            const api = `https://api.hackerone.com/v1/reports?filter[reporter][]=${CONFIG.h1User}`;
-            const response = await fetch(proxy + api, {
+            const response = await fetch(proxy + 'https://api.hackerone.com/v1/reports', {
                 headers: { 
-                    'Authorization': `Basic ${CONFIG.h1AuthBase64}`, 
+                    'Authorization': CONFIG.h1Auth, 
                     'Accept': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest'
                 }
             });
 
-            if (response.status === 403) {
-                out.innerHTML = `<a href="${proxy}corsdemo" target="_blank" style="color:red; font-size:10px;">ODBLOKUJ PROXY</a>`;
-                return;
-            }
-
             const res = await response.json();
             if (res.data) {
-                out.innerHTML = "";
-                for (const r of res.data) {
-                    // Pobieramy detale/wiadomości dla każdego raportu
-                    const actRes = await fetch(proxy + `https://api.hackerone.com/v1/reports/${r.id}/activities`, {
-                        headers: { 'Authorization': `Basic ${CONFIG.h1AuthBase64}`, 'Accept': 'application/json' }
-                    });
-                    const acts = await actRes.json();
-                    const lastMsg = acts.data?.[0]?.attributes?.message || "Brak nowych wiadomości.";
-
-                    out.innerHTML += `
-                        <div class="item h1-item">
-                            <span style="color:var(--gold)">[${r.attributes.state}]</span> <b>#${r.id}</b>: ${r.attributes.title}
-                            <div style="font-size:10px; color:#888; padding-left:10px;">💬 ${lastMsg.substring(0, 50)}...</div>
-                        </div>`;
-                }
+                h1Out.innerHTML = res.data.map(r => `
+                    <div class="item h1-item">
+                        <b style="color:var(--gold)">#${r.id}</b> [${r.attributes.state}]<br>${r.attributes.title}
+                    </div>`).join('');
             }
-        } catch (e) { out.innerHTML = "H1 Error."; }
+        } catch (e) { h1Out.innerHTML = "Błąd H1 (Sprawdź Proxy/Token)"; }
+
+        // 2. POBIERANIE Z SUPABASE
+        try {
+            const { data } = await _supa.from('logs').select('*');
+            if (data) {
+                supaOut.innerHTML = data.reverse().map(l => `
+                    <div class="item supa-item"><b>${l.title}</b>: ${l.content}</div>
+                `).join('');
+            }
+        } catch (e) { supaOut.innerHTML = "Błąd Supy."; }
     }
 
-    // INICJALIZACJA
-    loadSupa();
-    loadH1();
+    // START
+    window.onload = loadEverything;
 
-    // REALTIME I ZEGAR
-    _supa.channel('any').on('postgres_changes', { event: '*', schema: 'public', table: 'logs' }, loadSupa).subscribe();
-    setInterval(() => {
-        const c = document.getElementById('clock');
-        if(c) c.innerText = new Date().toLocaleTimeString();
-    }, 1000);
+    // Realtime dla Supabase (żeby logi wpadały same!)
+    _supa.channel('any').on('postgres_changes', { event: '*', schema: 'public', table: 'logs' }, loadEverything).subscribe();
 </script>
     
 </body>
