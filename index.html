@@ -3,70 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ROYAAL C2 DASHBOARD</title>
+    <title>ROYAAL C2 TERMINAL</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { background: #050505; color: #fff; font-family: 'Courier New', monospace; margin: 0; overflow-x: hidden; }
-        
-        /* Menu Boczne */
+        /* --- STYL TERMINALA --- */
+        body { 
+            background: #000; 
+            color: #00ff00; 
+            font-family: 'Courier New', Courier, monospace; 
+            margin: 0; 
+            padding: 20px;
+        }
+
+        /* Sidebar - Surowy styl */
         #sidebar {
-            position: fixed; top: 0; left: -280px; width: 280px; height: 100%;
-            background: #0a0a0a; border-right: 1px solid #333;
-            transition: 0.3s; z-index: 999; padding-top: 80px;
+            position: fixed; top: 0; left: -250px; width: 250px; height: 100%;
+            background: #000; border-right: 2px solid #00ff00;
+            transition: 0.2s; z-index: 999; padding-top: 60px;
         }
         #sidebar.open { left: 0; }
-        .nav-item { padding: 15px 25px; cursor: pointer; border-bottom: 1px solid #222; transition: 0.3s; }
-        .nav-item:hover { background: #1a1a1a; }
-        .yt-item { color: #ff0000; font-weight: bold; border: 1px solid #ff0000; margin: 20px; border-radius: 5px; text-align: center; }
+        
+        .nav-item { 
+            padding: 15px; cursor: pointer; border-bottom: 1px solid #004400; 
+            text-transform: uppercase; font-size: 14px;
+        }
+        .nav-item:hover { background: #002200; color: #fff; }
+        
+        .yt-item { color: #ff0000 !important; border: 1px solid #ff0000; margin: 10px; text-align: center; }
 
-        /* Przycisk Menu */
+        /* Przycisk MENU */
         #menu-btn {
-            position: fixed; top: 20px; left: 20px; z-index: 1000;
-            background: #000; color: #fff; border: 1px solid #333;
-            padding: 10px 15px; cursor: pointer; border-radius: 5px;
+            position: fixed; top: 10px; left: 10px; z-index: 1000;
+            background: #000; color: #00ff00; border: 1px solid #00ff00;
+            padding: 5px 10px; cursor: pointer; font-family: inherit;
         }
 
-        /* Kontenery widoków */
-        .view { display: none; padding: 80px 20px; max-width: 1000px; margin: 0 auto; }
+        /* Widoki */
+        .view { display: none; margin-top: 40px; }
         .active { display: block; }
 
-        /* Statystyki YT */
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; }
-        .stat-card { background: #111; padding: 20px; border-radius: 10px; text-align: center; border-left: 5px solid #444; }
-        .log-entry { background: #111; padding: 15px; border: 1px solid #222; margin-bottom: 10px; border-radius: 5px; }
+        /* Logi i Staty */
+        .log-entry { border: 1px solid #004400; padding: 10px; margin-bottom: 5px; background: #050505; }
+        .log-entry:hover { border-color: #00ff00; }
+        
+        .stats-container { display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 30px; }
+        .stat-box { border: 1px solid #00ff00; padding: 15px; min-width: 120px; text-align: center; }
+        
+        .yt-stats { border-color: #ff0000; color: #ff0000; }
+
+        hr { border: 0; border-top: 1px solid #004400; margin: 20px 0; }
+        
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: #004400; }
     </style>
 </head>
 <body>
 
-    <button id="menu-btn" onclick="toggleMenu()">☰ MENU</button>
+    <button id="menu-btn" onclick="toggleMenu()">[ MENU ]</button>
 
     <div id="sidebar">
-        <div class="nav-item" onclick="showView('dashboard')">🏠 DASHBOARD</div>
-        <div class="nav-item yt-item" onclick="showView('yt')">🔴 YT MODE</div>
-        <div class="nav-item" style="opacity: 0.3;">🛠️ PROJEKTY</div>
+        <div class="nav-item" onclick="showView('dashboard')">> DASHBOARD</div>
+        <div class="nav-item" onclick="showView('projects')">> PROJECTS</div>
+        <div class="nav-item yt-item" onclick="showView('yt')">> YT_MODE</div>
     </div>
 
     <div id="dashboard" class="view active">
-        <h1 style="color: #00ff00;">> ROOT@ROYAAL_C2:~/LOGS_</h1>
-        <div id="logs-container">Ładowanie logów...</div>
+        <h2>--- SYSTEM_LOGS_STREAM ---</h2>
+        <div id="logs-container">INITIALIZING...</div>
+    </div>
+
+    <div id="projects" class="view">
+        <h2>--- ACTIVE_PROJECTS ---</h2>
+        <div class="log-entry">1. REAKTYWACJA KANAŁU YT [W TOKU]</div>
+        <div class="log-entry">2. AUTO-BUG-REPORTER [PLANOWANIE]</div>
+        <div class="log-entry">3. C2 MOBILE APK [OCZEKIWANIE]</div>
     </div>
 
     <div id="yt" class="view">
-        <h1 style="color: #ff0000; text-shadow: 0 0 10px #ff0000;">🔴 YT CREATOR COMMAND</h1>
-        <div class="stats-grid">
-            <div class="stat-card" style="border-left-color: #00ff00;">
-                <p>PRZYJĘTO</p><h2 id="stat-accepted">0</h2>
-            </div>
-            <div class="stat-card" style="border-left-color: #ffcc00;">
-                <p>OCZEKUJE</p><h2 id="stat-pending">0</h2>
-            </div>
-            <div class="stat-card" style="border-left-color: #ff4444;">
-                <p>ODRZUCONO</p><h2 id="stat-rejected">0</h2>
-            </div>
-            <div class="stat-card" style="border-left-color: #ff0000;">
-                <p>YT SUBS</p><h2>1,240</h2>
-            </div>
+        <h2 style="color: #ff0000;">--- YT_COMMAND_CENTER ---</h2>
+        <div class="stats-container">
+            <div class="stat-box">ACCEPTED<br><span id="stat-accepted">0</span></div>
+            <div class="stat-box">PENDING<br><span id="stat-pending">0</span></div>
+            <div class="stat-box" style="border-color: #555; color: #555;">REJECTED<br><span id="stat-rejected">0</span></div>
+            <div class="stat-box yt-stats">SUBS<br>1,240</div>
         </div>
+        <div class="log-entry" style="border-color: #ff0000;">OSTATNI KOMENTARZ: "Dobra robota, czekam na więcej!"</div>
     </div>
 
     <script>
@@ -83,39 +104,24 @@
         }
 
         async function fetchLogs() {
-            const { data, error } = await _supabase.from('logs').select('*').order('created_at', { ascending: false });
+            const { data } = await _supabase.from('logs').select('*').order('created_at', { ascending: false });
             if (data) {
-                renderLogs(data);
-                calculateStats(data);
+                const container = document.getElementById('logs-container');
+                container.innerHTML = data.map(log => `
+                    <div class="log-entry">
+                        <span style="color: #006600">[${new Date(log.created_at).toLocaleTimeString()}]</span>
+                        <strong>${log.type}</strong>: ${log.title}
+                    </div>
+                `).join('');
+                
+                // Liczenie statystyk
+                document.getElementById('stat-accepted').innerText = data.filter(l => l.content?.toLowerCase().includes('triaged')).length;
+                document.getElementById('stat-pending').innerText = data.filter(l => l.content?.toLowerCase().includes('new')).length;
+                document.getElementById('stat-rejected').innerText = data.filter(l => l.content?.toLowerCase().includes('n/a')).length;
             }
         }
 
-        function renderLogs(logs) {
-            const container = document.getElementById('logs-container');
-            container.innerHTML = logs.map(log => `
-                <div class="log-entry">
-                    <span style="color: #555">[${new Date(log.created_at).toLocaleTimeString()}]</span>
-                    <strong style="color: ${log.type === 'H1' ? '#00aaff' : '#ffcc00'}"> ${log.type} </strong>
-                    <span>${log.title}</span>
-                </div>
-            `).join('');
-        }
-
-        function calculateStats(logs) {
-            const acc = logs.filter(l => l.content?.toLowerCase().includes('triaged')).length;
-            const pend = logs.filter(l => l.content?.toLowerCase().includes('new')).length;
-            const rej = logs.filter(l => l.content?.toLowerCase().includes('n/a')).length;
-            
-            document.getElementById('stat-accepted').innerText = acc;
-            document.getElementById('stat-pending').innerText = pend;
-            document.getElementById('stat-rejected').innerText = rej;
-        }
-
-        // Real-time update
-        _supabase.channel('logs').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'logs' }, payload => {
-            fetchLogs();
-        }).subscribe();
-
+        _supabase.channel('logs').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'logs' }, () => fetchLogs()).subscribe();
         fetchLogs();
     </script>
 </body>
